@@ -1,4 +1,5 @@
 import bpy
+from .icons import icon_collections
 from bpy.types import Panel
 
 class POINTCLOUD_PT_panel(Panel):
@@ -7,6 +8,11 @@ class POINTCLOUD_PT_panel(Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = 'LMI PointCloud Baker'
+
+    def draw_header(self, context):
+        """Draw custom SVG icon in the panel header."""
+        ico = icon_collections['main']["pointcloud_bake"].icon_id
+        self.layout.label(text="", icon_value=ico)
 
     def draw(self, context):
         layout = self.layout
