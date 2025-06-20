@@ -1,0 +1,94 @@
+import bpy
+from bpy.props import (
+    BoolProperty,
+    EnumProperty,
+    PointerProperty,
+    StringProperty,
+)
+
+
+class OctanePointCloudProperties(bpy.types.PropertyGroup):
+    """
+    Holds all user-configurable settings for CSV and Alembic exports.
+    """
+
+    # CSV Source configuration
+    csv_src_type: EnumProperty(
+        name="CSV Source Type",
+        description="Export from single object or collection for CSV",
+        items=[
+            ('OBJECT', "Object", "Export a single instancer object"),
+            ('COLLECTION', "Collection", "Export all objects in a collection"),
+        ],
+        default='OBJECT',
+    )
+    csv_object_source: PointerProperty(
+        name="CSV Object",
+        description="Instancer object for CSV export",
+        type=bpy.types.Object,
+    )
+    csv_collection_source: PointerProperty(
+        name="CSV Collection",
+        description="Collection of instancer objects for CSV export",
+        type=bpy.types.Collection,
+    )
+
+    # Naming
+    scene_name: StringProperty(
+        name="Scene Name",
+        description="Prefix token for all exports (e.g. S0)",
+        default="",
+    )
+    shot_name: StringProperty(
+        name="Shot Name",
+        description="Middle token for all exports (e.g. Shot01)",
+        default="",
+    )
+
+    # CSV export settings
+    csv_output_dir: StringProperty(
+        name="CSV Output Directory",
+        description="Directory path for CSV exports",
+        subtype='DIR_PATH',
+    )
+    overwrite_csv: BoolProperty(
+        name="Overwrite CSVs",
+        description="Allow overwriting existing CSV files",
+        default=False,
+    )
+
+    # Alembic export settings
+    export_abc: BoolProperty(
+        name="Export Alembic",
+        description="Enable exporting instancer sources as Alembic",
+        default=False,
+    )
+    abc_src_type: EnumProperty(
+        name="ABC Source Type",
+        description="Export single object or collection as Alembic",
+        items=[
+            ('OBJECT', "Object", "Export a single Alembic file"),
+            ('COLLECTION', "Collection", "Export multiple Alembic files from a collection"),
+        ],
+        default='OBJECT',
+    )
+    abc_object_source: PointerProperty(
+        name="ABC Object",
+        description="Object to export as Alembic",
+        type=bpy.types.Object,
+    )
+    abc_collection_source: PointerProperty(
+        name="ABC Collection",
+        description="Collection of objects to export as multiple Alembics",
+        type=bpy.types.Collection,
+    )
+    abc_output_dir: StringProperty(
+        name="ABC Output Directory",
+        description="Directory path for Alembic exports",
+        subtype='DIR_PATH',
+    )
+    overwrite_abc: BoolProperty(
+        name="Overwrite ABCs",
+        description="Allow overwriting existing Alembic files",
+        default=False,
+    )
