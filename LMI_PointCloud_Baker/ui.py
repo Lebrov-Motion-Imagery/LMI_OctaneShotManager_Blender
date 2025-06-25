@@ -33,6 +33,9 @@ class POINTCLOUD_PT_panel(Panel):
             layout.prop(p, 'csv_collection_source')
         layout.prop(p, 'csv_output_dir')
         layout.prop(p, 'overwrite_csv')
+        layout.prop(p, 'multi_frame_export')
+        if p.multi_frame_export:
+            layout.prop(p, 'frame_range')
         layout.operator('lmb.export_csv', text="Export CSV", icon='EXPORT')
         layout.separator()
 

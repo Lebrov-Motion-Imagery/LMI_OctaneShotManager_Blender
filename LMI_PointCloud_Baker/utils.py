@@ -3,6 +3,7 @@ import math
 from mathutils import Matrix
 from functools import wraps
 import time
+import csv
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -57,7 +58,7 @@ def flatten_matrices_to_list(matrix_list):
     Convert a list of 4x4 matrices to a list of flat row-major lists (3x4 only).
 
     :param matrix_list: Iterable of mathutils.Matrix
-    :returns: Dict mapping object name to list of flattened rows
+    :returns: List of flattened rows
     """
     flat = []
     for m in matrix_list:
@@ -89,9 +90,7 @@ def timed(func):
 # -----------------------------------------------------------------------------
 # CSV Writer Utility
 # -----------------------------------------------------------------------------
-import csv
-
-def write_csv_groups(groups, base_dir, subfolder, overwrite):
+def write_csv_groups(groups, base_dir, subfolder, overwrite, frame_suffix=None, pc_suffix=False):
     """
     Write instance transform groups to CSV files.
 
@@ -99,6 +98,8 @@ def write_csv_groups(groups, base_dir, subfolder, overwrite):
     :param base_dir: Root directory path
     :param subfolder: Subdirectory name (or None)
     :param overwrite: Bool, whether to overwrite existing files
+    :param frame_suffix: Optional int to append as frame suffix
+    :param pc_suffix: Bool, whether to append '_PC' to object names
     :returns: None
     """
     out_dir = os.path.join(base_dir, subfolder) if subfolder else base_dir
@@ -106,7 +107,13 @@ def write_csv_groups(groups, base_dir, subfolder, overwrite):
 
     header = [f"M{r}{c}" for r in range(3) for c in range(4)] + ['ID']
     for obj_name, rows in groups.items():
-        filename = generate_export_filename([obj_name, 'PC'], CSV_EXTENSION)
+        # Build base token (with PC suffix if requested)
+        base_token = f"{obj_name}_PC" if pc_suffix else obj_name
+        # Assemble tokens for filename
+        parts = [base_token]
+        if frame_suffix is not None:
+            parts.append(str(frame_suffix))
+        filename = generate_export_filename(parts, CSV_EXTENSION)
         filepath = os.path.join(out_dir, filename)
         if os.path.exists(filepath) and not overwrite:
             continue
@@ -115,3 +122,38 @@ def write_csv_groups(groups, base_dir, subfolder, overwrite):
             writer.writerow(header)
             for idx, row in enumerate(rows):
                 writer.writerow(row + [idx])
+
+# -----------------------------------------------------------------------------
+# Frame Range Parser
+# -----------------------------------------------------------------------------
+def parse_frame_range(frame_range_str):
+    """
+    Parse a string of frames/ranges into a sorted list of unique frame ints.
+
+    Supported formats:
+      - Single frames: "2,5,10"
+      - Ranges: "1-5"
+      - Combined: "1,3-5,10"
+
+    :param frame_range_str: String input
+    :returns: Sorted list of frame numbers (ints)
+    """
+    frames = set()
+    tokens = frame_range_str.split(',') if frame_range_str else []
+    for tok in tokens:
+        tok = tok.strip()
+        if '-' in tok:
+            parts = tok.split('-', 1)
+            try:
+                start, end = int(parts[0]), int(parts[1])
+            except ValueError:
+                continue
+            step = 1 if start <= end else -1
+            frames.update(range(start, end + step, step))
+        else:
+            try:
+                frames.add(int(tok))
+            except ValueError:
+                continue
+    return sorted(frames)
+

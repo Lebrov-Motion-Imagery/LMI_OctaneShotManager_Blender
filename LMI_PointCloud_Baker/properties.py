@@ -21,7 +21,7 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
             ('COLLECTION', "Collection", "Export all objects in a collection"),
         ],
         default='OBJECT',
-    )
+    ) # type: ignore
     csv_object_source: PointerProperty(
         name="CSV Object",
         description="Instancer object for CSV export",
@@ -31,6 +31,18 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         name="CSV Collection",
         description="Collection of instancer objects for CSV export",
         type=bpy.types.Collection,
+    )
+
+    # Multi-frame export
+    multi_frame_export: BoolProperty(
+        name="Multi-frame Export",
+        description="Enable exporting CSVs over a frame sequence",
+        default=False,
+    )
+    frame_range: StringProperty(
+        name="Frame Range",
+        description="Comma-separated frames or ranges (e.g. '1,5,10-20')",
+        default="",
     )
 
     # Naming
