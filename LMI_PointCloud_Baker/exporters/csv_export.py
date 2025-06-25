@@ -7,7 +7,6 @@ from ..properties import OctanePointCloudProperties
 from ..utils import (
     ensure_directory,
     build_asset_world_matrices,
-    write_csv_groups,
     generate_export_filename,
     CSV_EXTENSION,
 )
