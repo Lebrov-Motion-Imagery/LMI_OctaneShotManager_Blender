@@ -1,7 +1,7 @@
 bl_info = {
     "name": "LMI PointCloud Baker",
     "author": "Arseniy Kolenchenko (Lebrov Motion Imagery) & OTOY Inc.",
-    "version": (1, 0, 0),
+    "version": (1, 1, 0),
     "blender": (4, 4, 3),
     "location": "View3D > Sidebar > LMI PointCloud Baker",
     "description": (
