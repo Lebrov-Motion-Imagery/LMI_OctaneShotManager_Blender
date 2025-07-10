@@ -7,3 +7,6 @@
 # Byte-compiled Python
 __pycache__/
 *.pyc
+*.rsls
+*.rslsc
+*.rslsz
