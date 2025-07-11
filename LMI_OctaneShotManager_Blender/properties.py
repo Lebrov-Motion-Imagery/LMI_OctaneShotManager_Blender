@@ -109,5 +109,5 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
     show_pointcloud_baker: BoolProperty(
         name="Show PointCloud Baker",
         description="Display PointCloud Baker settings",
-        default=True,
+        default=False,
     )
