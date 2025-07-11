@@ -50,8 +50,8 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         name="Scene Name Source",
         description="How to determine the scene name token",
         items=[
-            ('FILE', "Blend File", "Use the .blend file name"),
-            ('SCENE', "Scene", "Use the current scene name"),
+            ('FILE', "Blender File", "Use the .blend file name"),
+            ('SCENE', "Scene Name", "Use the current scene name"),
             ('MANUAL', "Manual", "Input scene name manually"),
         ],
         default='MANUAL',
@@ -66,10 +66,15 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         name="Shot Name Source",
         description="How to determine the shot name token",
         items=[
-            ('OBJECT', "Selected Object", "Use the active object's name"),
+            ('OBJECT', "Selected Camera", "Use the chosen object's name"),
             ('MANUAL', "Manual", "Input shot name manually"),
         ],
         default='MANUAL',
+    )
+    shot_object_source: PointerProperty(
+        name="Shot Camera",
+        description="Object to use for the shot name",
+        type=bpy.types.Object,
     )
     shot_name_manual: StringProperty(
         name="Shot Name",
@@ -130,4 +135,9 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         name="Show PointCloud Baker",
         description="Display PointCloud Baker settings",
         default=False,
+    )
+    show_naming_settings: BoolProperty(
+        name="Show Naming Settings",
+        description="Display scene and shot naming options",
+        default=True,
     )

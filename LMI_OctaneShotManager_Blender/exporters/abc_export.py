@@ -30,7 +30,7 @@ class LMB_OT_export_abc(Operator):
 
         def resolve_shot_name():
             if props.shot_name_source == 'OBJECT':
-                obj = context.view_layer.objects.active
+                obj = props.shot_object_source
                 return obj.name if obj else ""
             return props.shot_name_manual
 

@@ -18,24 +18,33 @@ class POINTCLOUD_PT_panel(Panel):
         layout = self.layout
         p = context.scene.otpc_props
 
-        # Naming
-        layout.label(text="Naming", icon='GREASEPENCIL')
+        # Naming Section
+        row = layout.row()
+        arrow = 'TRIA_DOWN' if p.show_naming_settings else 'TRIA_RIGHT'
+        row.prop(p, 'show_naming_settings', text="", icon=arrow, emboss=False)
+        row.label(text="Name your scene and shot:", icon='GREASEPENCIL')
 
-        row = layout.row(align=True)
-        sub = row.row(align=True)
-        sub.enabled = bool(bpy.data.filepath)
-        sub.prop_enum(p, 'scene_name_source', 'FILE', text='File')
-        row.prop_enum(p, 'scene_name_source', 'SCENE', text='Scene')
-        row.prop_enum(p, 'scene_name_source', 'MANUAL', text='Manual')
-        if p.scene_name_source == 'MANUAL':
-            layout.prop(p, 'scene_name_manual')
+        if p.show_naming_settings:
+            box = layout.box()
+            box.label(text="Decide how to name your scene:")
+            row = box.row(align=True)
+            sub = row.row(align=True)
+            sub.enabled = bool(bpy.data.filepath)
+            sub.prop_enum(p, 'scene_name_source', 'FILE', text='Blender File')
+            row.prop_enum(p, 'scene_name_source', 'SCENE', text='Scene Name')
+            row.prop_enum(p, 'scene_name_source', 'MANUAL', text='Manual')
+            if p.scene_name_source == 'MANUAL':
+                box.prop(p, 'scene_name_manual')
 
-        row = layout.row(align=True)
-        row.prop_enum(p, 'shot_name_source', 'OBJECT', text='Selected')
-        row.prop_enum(p, 'shot_name_source', 'MANUAL', text='Manual')
-        if p.shot_name_source == 'MANUAL':
-            layout.prop(p, 'shot_name_manual')
-        layout.separator()
+            box.label(text="Decide how to name your shot:")
+            row = box.row(align=True)
+            row.prop_enum(p, 'shot_name_source', 'OBJECT', text='Selected Camera')
+            row.prop_enum(p, 'shot_name_source', 'MANUAL', text='Manual')
+            if p.shot_name_source == 'MANUAL':
+                box.prop(p, 'shot_name_manual')
+            elif p.shot_name_source == 'OBJECT':
+                box.prop(p, 'shot_object_source')
+            layout.separator()
 
         # PointCloud Baker dropdown
         row = layout.row()
