@@ -104,3 +104,10 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         description="Allow overwriting existing Alembic files",
         default=False,
     )
+
+    # UI toggles
+    show_pointcloud_baker: BoolProperty(
+        name="Show PointCloud Baker",
+        description="Display PointCloud Baker settings",
+        default=True,
+    )
