@@ -20,6 +20,20 @@ class LMB_OT_export_abc(Operator):
     def execute(self, context):
         props = context.scene.otpc_props  # type: OctanePointCloudProperties
 
+        def resolve_scene_name():
+            if props.scene_name_source == 'FILE':
+                filepath = bpy.data.filepath
+                return os.path.splitext(os.path.basename(filepath))[0] if filepath else ""
+            if props.scene_name_source == 'SCENE':
+                return context.scene.name
+            return props.scene_name_manual
+
+        def resolve_shot_name():
+            if props.shot_name_source == 'OBJECT':
+                obj = context.view_layer.objects.active
+                return obj.name if obj else ""
+            return props.shot_name_manual
+
         # Determine sources
         if props.abc_src_type == 'OBJECT':
             sources = [props.abc_object_source] if props.abc_object_source else []
@@ -40,9 +54,11 @@ class LMB_OT_export_abc(Operator):
             ensure_directory(base_dir)
 
         # Export each object
+        scene_name = resolve_scene_name()
+        shot_name = resolve_shot_name()
         for obj in sources:
             # Build filename
-            parts = [props.scene_name, props.shot_name, obj.name]
+            parts = [scene_name, shot_name, obj.name]
             filename = generate_export_filename(parts, ABC_EXTENSION)
             filepath = os.path.join(base_dir, filename)
 

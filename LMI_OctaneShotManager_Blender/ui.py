@@ -20,8 +20,21 @@ class POINTCLOUD_PT_panel(Panel):
 
         # Naming
         layout.label(text="Naming", icon='GREASEPENCIL')
-        layout.prop(p, 'scene_name')
-        layout.prop(p, 'shot_name')
+
+        row = layout.row(align=True)
+        sub = row.row(align=True)
+        sub.enabled = bool(bpy.data.filepath)
+        sub.prop_enum(p, 'scene_name_source', 'FILE', text='File')
+        row.prop_enum(p, 'scene_name_source', 'SCENE', text='Scene')
+        row.prop_enum(p, 'scene_name_source', 'MANUAL', text='Manual')
+        if p.scene_name_source == 'MANUAL':
+            layout.prop(p, 'scene_name_manual')
+
+        row = layout.row(align=True)
+        row.prop_enum(p, 'shot_name_source', 'OBJECT', text='Selected')
+        row.prop_enum(p, 'shot_name_source', 'MANUAL', text='Manual')
+        if p.shot_name_source == 'MANUAL':
+            layout.prop(p, 'shot_name_manual')
         layout.separator()
 
         # PointCloud Baker dropdown

@@ -46,14 +46,34 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
     )
 
     # Naming
-    scene_name: StringProperty(
+    scene_name_source: EnumProperty(
+        name="Scene Name Source",
+        description="How to determine the scene name token",
+        items=[
+            ('FILE', "Blend File", "Use the .blend file name"),
+            ('SCENE', "Scene", "Use the current scene name"),
+            ('MANUAL', "Manual", "Input scene name manually"),
+        ],
+        default='MANUAL',
+    )
+    scene_name_manual: StringProperty(
         name="Scene Name",
-        description="Prefix token for all exports (e.g. S0)",
+        description="Manual scene name token",
         default="",
     )
-    shot_name: StringProperty(
+
+    shot_name_source: EnumProperty(
+        name="Shot Name Source",
+        description="How to determine the shot name token",
+        items=[
+            ('OBJECT', "Selected Object", "Use the active object's name"),
+            ('MANUAL', "Manual", "Input shot name manually"),
+        ],
+        default='MANUAL',
+    )
+    shot_name_manual: StringProperty(
         name="Shot Name",
-        description="Middle token for all exports (e.g. Shot01)",
+        description="Manual shot name token",
         default="",
     )
 
