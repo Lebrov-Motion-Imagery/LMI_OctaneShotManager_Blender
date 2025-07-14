@@ -140,7 +140,6 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         description="Display scene and shot naming options",
         default=True,
     )
-
     show_tags_workflow: BoolProperty(
         name="Show TAGs Workflow",
         description="Display LMI TAGs Workflow settings",

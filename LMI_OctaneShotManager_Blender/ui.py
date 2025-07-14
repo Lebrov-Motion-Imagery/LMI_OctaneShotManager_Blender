@@ -65,7 +65,7 @@ class POINTCLOUD_PT_panel(Panel):
             col.operator('lmb.tag_collection_add', icon='ADD', text='')
             col.operator('lmb.tag_collection_remove', icon='REMOVE', text='')
             layout.separator()
-
+            
         # PointCloud Baker dropdown
         row = layout.row()
         arrow = 'TRIA_DOWN' if p.show_pointcloud_baker else 'TRIA_RIGHT'
