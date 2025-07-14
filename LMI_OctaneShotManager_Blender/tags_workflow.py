@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import PropertyGroup, Operator, UIList
-from bpy.props import PointerProperty, BoolProperty
+from bpy.props import PointerProperty, BoolProperty, CollectionProperty
 
 from .utils import find_layer_collection
 
@@ -63,15 +63,28 @@ class LMB_OT_tag_collection_drop(Operator):
         type=bpy.types.Collection,
         options={'HIDDEN'},
     )
+    collections: CollectionProperty(
+        type=bpy.types.Collection,
+        options={'HIDDEN'},
+    )
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene is not None
 
     def execute(self, context):
-        coll = self.collection
-        if not coll:
+        cols = []
+        if self.collection:
+            cols.append(self.collection)
+        if getattr(self, "collections", None):
+            cols.extend([c for c in self.collections if c])
+        if not cols:
             return {'CANCELLED'}
 
         props = context.scene.otpc_props
-        item = props.tag_collections.add()
-        item.collection = coll
+        for coll in cols:
+            item = props.tag_collections.add()
+            item.collection = coll
         props.tag_collections_index = len(props.tag_collections) - 1
         return {'FINISHED'}
 
