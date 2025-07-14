@@ -13,10 +13,12 @@ from .tags_workflow import (
 from .ui import POINTCLOUD_PT_panel
 
 classes = (
+    # Register the PropertyGroup used by OctanePointCloudProperties first so
+    # Blender can resolve the CollectionProperty reference on registration.
+    TagCollectionItem,
     OctanePointCloudProperties,
     LMB_OT_export_csv,
     LMB_OT_export_abc,
-    TagCollectionItem,
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_remove,
