@@ -48,7 +48,21 @@ class LMB_OT_tag_collection_add(Operator):
 
     def execute(self, context):
         props = context.scene.otpc_props
-        item = props.tag_collections.add()
+
+        selected_cols = [id for id in getattr(context, "selected_ids", [])
+                         if isinstance(id, bpy.types.Collection)]
+
+        if not selected_cols:
+            self.report({'INFO'},
+                        "There are no collections selected, nothing to add.")
+            return {'CANCELLED'}
+
+        for coll in selected_cols:
+            if any(item.collection == coll for item in props.tag_collections):
+                continue
+            item = props.tag_collections.add()
+            item.collection = coll
+
         props.tag_collections_index = len(props.tag_collections) - 1
         return {'FINISHED'}
 
