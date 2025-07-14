@@ -6,6 +6,7 @@ from .exporters.csv_export import LMB_OT_export_csv
 from .exporters.abc_export import LMB_OT_export_abc
 from .tags_workflow import (
     TagCollectionItem,
+    DropCollectionItem,
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_drop,
@@ -17,6 +18,7 @@ classes = (
     # Register the PropertyGroup used by OctanePointCloudProperties first so
     # Blender can resolve the CollectionProperty reference on registration.
     TagCollectionItem,
+    DropCollectionItem,
     OctanePointCloudProperties,
     LMB_OT_export_csv,
     LMB_OT_export_abc,

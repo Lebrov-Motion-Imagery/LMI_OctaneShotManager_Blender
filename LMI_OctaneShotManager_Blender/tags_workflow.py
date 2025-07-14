@@ -64,7 +64,7 @@ class LMB_OT_tag_collection_drop(Operator):
         options={'HIDDEN'},
     )
     collections: CollectionProperty(
-        type=bpy.types.Collection,
+        type=DropCollectionItem,
         options={'HIDDEN'},
     )
 
@@ -105,6 +105,7 @@ class LMB_OT_tag_collection_remove(Operator):
 
 classes = (
     TagCollectionItem,
+    DropCollectionItem,
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_drop,
