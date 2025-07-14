@@ -25,28 +25,29 @@ class POINTCLOUD_PT_panel(Panel):
         row.label(text="Name your scene, shot and select path for Shot Manager:", icon='GREASEPENCIL')
 
         if p.show_naming_settings:
-            box = layout.box()
-            box.label(text="Decide how to name your scene:")
-            row = box.row(align=True)
+            name_box = layout.box()
+            name_box.label(text="Decide how to name your scene:")
+            row = name_box.row(align=True)
             sub = row.row(align=True)
             sub.enabled = bool(bpy.data.filepath)
             sub.prop_enum(p, 'scene_name_source', 'FILE', text='Blender File')
             row.prop_enum(p, 'scene_name_source', 'SCENE', text='Scene Name')
             row.prop_enum(p, 'scene_name_source', 'MANUAL', text='Manual')
             if p.scene_name_source == 'MANUAL':
-                box.prop(p, 'scene_name_manual')
+                name_box.prop(p, 'scene_name_manual')
 
-            box.label(text="Decide how to name your shot:")
-            row = box.row(align=True)
+            name_box.label(text="Decide how to name your shot:")
+            row = name_box.row(align=True)
             row.prop_enum(p, 'shot_name_source', 'OBJECT', text='Selected Camera')
             row.prop_enum(p, 'shot_name_source', 'MANUAL', text='Manual')
             if p.shot_name_source == 'MANUAL':
-                box.prop(p, 'shot_name_manual')
+                name_box.prop(p, 'shot_name_manual')
             elif p.shot_name_source == 'OBJECT':
-                box.prop(p, 'shot_object_source')
+                name_box.prop(p, 'shot_object_source')
 
-            box.label(text="Path selection")
-            box.prop(p, 'root_output_dir')
+            path_box = layout.box()
+            path_box.label(text="Path selection:")
+            path_box.prop(p, 'root_output_dir')
             layout.separator()
 
         # PointCloud Baker dropdown
