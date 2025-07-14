@@ -53,6 +53,29 @@ class LMB_OT_tag_collection_add(Operator):
         return {'FINISHED'}
 
 
+class LMB_OT_tag_collection_drop(Operator):
+    bl_idname = "lmb.tag_collection_drop"
+    bl_label = "Drop Collection to TAG"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    collection: PointerProperty(
+        name="Collection",
+        type=bpy.types.Collection,
+        options={'HIDDEN'},
+    )
+
+    def execute(self, context):
+        coll = self.collection
+        if not coll:
+            return {'CANCELLED'}
+
+        props = context.scene.otpc_props
+        item = props.tag_collections.add()
+        item.collection = coll
+        props.tag_collections_index = len(props.tag_collections) - 1
+        return {'FINISHED'}
+
+
 class LMB_OT_tag_collection_remove(Operator):
     bl_idname = "lmb.tag_collection_remove"
     bl_label = "Remove Collection from TAG"
@@ -71,6 +94,7 @@ classes = (
     TagCollectionItem,
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
+    LMB_OT_tag_collection_drop,
     LMB_OT_tag_collection_remove,
 )
 
