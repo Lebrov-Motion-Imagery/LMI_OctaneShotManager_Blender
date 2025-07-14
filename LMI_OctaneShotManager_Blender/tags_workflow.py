@@ -4,6 +4,18 @@ from bpy.props import PointerProperty, BoolProperty
 
 from .utils import find_layer_collection
 
+
+def _is_parent_of(parent, child):
+    for sub in parent.children:
+        if sub == child or _is_parent_of(sub, child):
+            return True
+    return False
+
+
+def has_hierarchy_relation(col_a, col_b):
+    """Return True if collections have a parent-child relationship."""
+    return _is_parent_of(col_a, col_b) or _is_parent_of(col_b, col_a)
+
 class TagCollectionItem(PropertyGroup):
     collection: PointerProperty(
         name="Collection",
@@ -15,12 +27,25 @@ class TagCollectionItem(PropertyGroup):
         if not coll:
             return
         layer = find_layer_collection(context.view_layer.layer_collection, coll)
-        if layer:
-            layer.exclude = self.exclude
+        if not layer:
+            return
+
+        def toggle_layer(layer_coll, state):
+            for lc in layer_coll.children:
+                toggle_layer(lc, state)
+                lc.exclude = state
+
+        if self.exclude:
+            # Solo this collection - disable all others
+            toggle_layer(context.view_layer.layer_collection, True)
+            layer.exclude = False
+        else:
+            # Re-enable all collections
+            toggle_layer(context.view_layer.layer_collection, False)
 
     exclude: BoolProperty(
-        name="Exclude",
-        description="Exclude this collection from the view layer",
+        name="Solo",
+        description="Disable all collections except this one when enabled",
         default=False,
         update=update_exclude,
     )
@@ -76,9 +101,19 @@ class LMB_OT_tag_collection_add(Operator):
                         "There are no collections selected, nothing to add.")
             return {'CANCELLED'}
 
+        existing = [item.collection for item in props.tag_collections]
+        to_add = []
         for coll in selected_cols:
             if any(item.collection == coll for item in props.tag_collections):
                 continue
+            for other in existing + to_add:
+                if has_hierarchy_relation(coll, other):
+                    self.report({'INFO'},
+                                "Child or parent collections can not be tagged. Only the same level of collection hierarchy is allowed to TAG")
+                    return {'CANCELLED'}
+            to_add.append(coll)
+
+        for coll in to_add:
             item = props.tag_collections.add()
             item.collection = coll
 
