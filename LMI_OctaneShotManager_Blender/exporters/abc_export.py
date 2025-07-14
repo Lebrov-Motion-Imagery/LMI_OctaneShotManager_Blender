@@ -7,6 +7,7 @@ from ..utils import (
     ensure_directory,
     generate_export_filename,
     build_asset_world_matrices,
+    build_scene_shot_prefix,
     ABC_EXTENSION,
 )
 
@@ -46,20 +47,22 @@ class LMB_OT_export_abc(Operator):
             self.report({'ERROR'}, "No Alembic sources defined.")
             return {'CANCELLED'}
 
+        scene_name = resolve_scene_name()
+        shot_name = resolve_shot_name()
+
         # Prepare output directory hierarchy
         base_root = bpy.path.abspath(props.root_output_dir)
-        base_dir = os.path.join(base_root, "Shot_Manager", "ABCs")
+        prefix = build_scene_shot_prefix(scene_name, shot_name)
+        base_dir = os.path.join(base_root, "Shot_Manager", "ABCs", prefix)
         ensure_directory(base_dir)
         if root_folder:
             base_dir = os.path.join(base_dir, root_folder)
             ensure_directory(base_dir)
 
         # Export each object
-        scene_name = resolve_scene_name()
-        shot_name = resolve_shot_name()
         for obj in sources:
-            # Build filename
-            parts = [scene_name, shot_name, obj.name]
+            # Build filename with scene/shot prefix
+            parts = [prefix, obj.name]
             filename = generate_export_filename(parts, ABC_EXTENSION)
             filepath = os.path.join(base_dir, filename)
 
