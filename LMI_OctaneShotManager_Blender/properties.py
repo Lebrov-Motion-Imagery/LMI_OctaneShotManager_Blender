@@ -4,7 +4,11 @@ from bpy.props import (
     EnumProperty,
     PointerProperty,
     StringProperty,
+    CollectionProperty,
+    IntProperty,
 )
+
+from .tags_workflow import TagCollectionItem
 
 
 class OctanePointCloudProperties(bpy.types.PropertyGroup):
@@ -33,9 +37,9 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         type=bpy.types.Collection,
     )
 
-    # Multi-frame export
+    # Multi-frame CSV export
     multi_frame_export: BoolProperty(
-        name="Multi-frame Export",
+        name="Multi-frame CSV Export",
         description="Enable exporting CSVs over a frame sequence",
         default=False,
     )
@@ -46,21 +50,46 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
     )
 
     # Naming
-    scene_name: StringProperty(
-        name="Scene Name",
-        description="Prefix token for all exports (e.g. S0)",
-        default="",
+    scene_name_source: EnumProperty(
+        name="Scene Name Source",
+        description="How to determine the scene name token",
+        items=[
+            ('FILE', "Blender File", "Use the .blend file name"),
+            ('SCENE', "Scene Name", "Use the current scene name"),
+            ('MANUAL', "Manual", "Input scene name manually"),
+        ],
+        default='MANUAL',
     )
-    shot_name: StringProperty(
-        name="Shot Name",
-        description="Middle token for all exports (e.g. Shot01)",
+    scene_name_manual: StringProperty(
+        name="Scene Name",
+        description="Manual scene name token",
         default="",
     )
 
-    # CSV export settings
-    csv_output_dir: StringProperty(
-        name="CSV Output Directory",
-        description="Directory path for CSV exports",
+    shot_name_source: EnumProperty(
+        name="Shot Name Source",
+        description="How to determine the shot name token",
+        items=[
+            ('OBJECT', "Selected Camera", "Use the chosen object's name"),
+            ('MANUAL', "Manual", "Input shot name manually"),
+        ],
+        default='MANUAL',
+    )
+    shot_object_source: PointerProperty(
+        name="Shot Camera",
+        description="Object to use for the shot name",
+        type=bpy.types.Object,
+    )
+    shot_name_manual: StringProperty(
+        name="Shot Name",
+        description="Manual shot name token",
+        default="",
+    )
+
+    # Output root directory used for all exports
+    root_output_dir: StringProperty(
+        name="Output Root Directory",
+        description="Top directory for all Shot Manager exports",
         subtype='DIR_PATH',
     )
     overwrite_csv: BoolProperty(
@@ -94,13 +123,29 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         description="Collection of objects to export as multiple Alembics",
         type=bpy.types.Collection,
     )
-    abc_output_dir: StringProperty(
-        name="ABC Output Directory",
-        description="Directory path for Alembic exports",
-        subtype='DIR_PATH',
-    )
     overwrite_abc: BoolProperty(
         name="Overwrite ABCs",
         description="Allow overwriting existing Alembic files",
         default=False,
     )
+
+    # UI toggles
+    show_pointcloud_baker: BoolProperty(
+        name="Show PointCloud Baker",
+        description="Display PointCloud Baker settings",
+        default=False,
+    )
+    show_naming_settings: BoolProperty(
+        name="Show Naming Settings",
+        description="Display scene and shot naming options",
+        default=True,
+    )
+
+    show_tags_workflow: BoolProperty(
+        name="Show TAGs Workflow",
+        description="Display LMI TAGs Workflow settings",
+        default=False,
+    )
+
+    tag_collections: CollectionProperty(type=TagCollectionItem)
+    tag_collections_index: IntProperty(default=-1)
