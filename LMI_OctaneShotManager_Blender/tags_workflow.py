@@ -4,6 +4,18 @@ from bpy.props import PointerProperty, BoolProperty
 
 from .utils import find_layer_collection
 
+
+def _is_parent_of(parent, child):
+    for sub in parent.children:
+        if sub == child or _is_parent_of(sub, child):
+            return True
+    return False
+
+
+def has_hierarchy_relation(col_a, col_b):
+    """Return True if collections have a parent-child relationship."""
+    return _is_parent_of(col_a, col_b) or _is_parent_of(col_b, col_a)
+
 class TagCollectionItem(PropertyGroup):
     collection: PointerProperty(
         name="Collection",
@@ -11,16 +23,34 @@ class TagCollectionItem(PropertyGroup):
     )
 
     def update_exclude(self, context):
-        coll = self.collection
-        if not coll:
-            return
-        layer = find_layer_collection(context.view_layer.layer_collection, coll)
-        if layer:
-            layer.exclude = self.exclude
+        props = context.scene.otpc_props
+
+        def toggle_layer(layer_coll, state):
+            for lc in layer_coll.children:
+                toggle_layer(lc, state)
+                lc.exclude = state
+
+        selected_layers = []
+        for item in props.tag_collections:
+            if not item.exclude:
+                continue
+            coll = item.collection
+            if not coll:
+                continue
+            layer = find_layer_collection(context.view_layer.layer_collection, coll)
+            if layer:
+                selected_layers.append(layer)
+
+        if selected_layers:
+            toggle_layer(context.view_layer.layer_collection, True)
+            for layer in selected_layers:
+                layer.exclude = False
+        else:
+            toggle_layer(context.view_layer.layer_collection, False)
 
     exclude: BoolProperty(
-        name="Exclude",
-        description="Exclude this collection from the view layer",
+        name="Solo",
+        description="Include checked collections only, hiding all others",
         default=False,
         update=update_exclude,
     )
@@ -48,7 +78,50 @@ class LMB_OT_tag_collection_add(Operator):
 
     def execute(self, context):
         props = context.scene.otpc_props
-        item = props.tag_collections.add()
+
+        selected_cols = [id for id in getattr(context, "selected_ids", [])
+                         if isinstance(id, bpy.types.Collection)]
+
+        if not selected_cols:
+            # Try to fetch selection from an Outliner area since this operator is
+            # executed from another editor where ``context.selected_ids`` is
+            # empty.
+            for window in context.window_manager.windows:
+                for area in window.screen.areas:
+                    if area.type != 'OUTLINER':
+                        continue
+                    region = next((r for r in area.regions if r.type == 'WINDOW'), None)
+                    if region is None:
+                        continue
+                    with context.temp_override(window=window, area=area, region=region):
+                        selected_cols = [id for id in getattr(bpy.context, "selected_ids", [])
+                                         if isinstance(id, bpy.types.Collection)]
+                    if selected_cols:
+                        break
+                if selected_cols:
+                    break
+
+        if not selected_cols:
+            self.report({'INFO'},
+                        "There are no collections selected, nothing to add.")
+            return {'CANCELLED'}
+
+        existing = [item.collection for item in props.tag_collections]
+        to_add = []
+        for coll in selected_cols:
+            if any(item.collection == coll for item in props.tag_collections):
+                continue
+            for other in existing + to_add:
+                if has_hierarchy_relation(coll, other):
+                    self.report({'INFO'},
+                                "Child or parent collections can not be tagged. Only the same level of collection hierarchy is allowed to TAG")
+                    return {'CANCELLED'}
+            to_add.append(coll)
+
+        for coll in to_add:
+            item = props.tag_collections.add()
+            item.collection = coll
+
         props.tag_collections_index = len(props.tag_collections) - 1
         return {'FINISHED'}
 
