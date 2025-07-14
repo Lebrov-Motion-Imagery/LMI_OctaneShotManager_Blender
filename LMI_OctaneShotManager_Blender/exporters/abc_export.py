@@ -46,8 +46,9 @@ class LMB_OT_export_abc(Operator):
             self.report({'ERROR'}, "No Alembic sources defined.")
             return {'CANCELLED'}
 
-        # Prepare output directory
-        base_dir = bpy.path.abspath(props.abc_output_dir)
+        # Prepare output directory hierarchy
+        base_root = bpy.path.abspath(props.root_output_dir)
+        base_dir = os.path.join(base_root, "Shot_Manager", "ABCs")
         ensure_directory(base_dir)
         if root_folder:
             base_dir = os.path.join(base_dir, root_folder)

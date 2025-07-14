@@ -43,8 +43,9 @@ class LMB_OT_export_csv(Operator):
             self.report({'ERROR'}, "No CSV instancer sources defined.")
             return {'CANCELLED'}
 
-        # Prepare output directory
-        base_dir = bpy.path.abspath(props.csv_output_dir)
+        # Prepare output directory hierarchy
+        base_root = bpy.path.abspath(props.root_output_dir)
+        base_dir = os.path.join(base_root, "Shot_Manager", "CSVs")
         ensure_directory(base_dir)
 
         # Prepare transform matrices

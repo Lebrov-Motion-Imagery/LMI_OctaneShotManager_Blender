@@ -82,10 +82,10 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         default="",
     )
 
-    # CSV export settings
-    csv_output_dir: StringProperty(
-        name="CSV Output Directory",
-        description="Directory path for CSV exports",
+    # Output root directory used for all exports
+    root_output_dir: StringProperty(
+        name="Output Root Directory",
+        description="Top directory for all Shot Manager exports",
         subtype='DIR_PATH',
     )
     overwrite_csv: BoolProperty(
@@ -118,11 +118,6 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         name="ABC Collection",
         description="Collection of objects to export as multiple Alembics",
         type=bpy.types.Collection,
-    )
-    abc_output_dir: StringProperty(
-        name="ABC Output Directory",
-        description="Directory path for Alembic exports",
-        subtype='DIR_PATH',
     )
     overwrite_abc: BoolProperty(
         name="Overwrite ABCs",
