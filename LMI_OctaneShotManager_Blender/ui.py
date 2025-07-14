@@ -58,7 +58,7 @@ class POINTCLOUD_PT_panel(Panel):
 
         if p.show_tags_workflow:
             tag_box = layout.box()
-            tag_box.label(text="Choose collections to TAG:")
+            tag_box.label(text="Select in outliner collections that should be TAGed and click '+' button")
             row = tag_box.row()
             row.template_list('LMB_UL_tag_collections', '', p, 'tag_collections', p, 'tag_collections_index')
             col = row.column(align=True)

@@ -13,10 +13,12 @@ from .tags_workflow import (
 from .ui import POINTCLOUD_PT_panel
 
 classes = (
+    # Register the PropertyGroup used by OctanePointCloudProperties first so
+    # Blender can resolve the CollectionProperty reference on registration.
+    TagCollectionItem,
     OctanePointCloudProperties,
     LMB_OT_export_csv,
     LMB_OT_export_abc,
-    TagCollectionItem,
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_remove,
@@ -25,16 +27,33 @@ classes = (
 
 
 def register():
-    """Load custom icons, register all classes, and attach props to the Scene."""
+    """Load icons and register all classes and properties.
+
+    This function is safe to call multiple times. It avoids the "already
+    registered" errors that can occur when the add-on is reloaded while
+    developing in Blender."""
+
     load_icons()
     for cls in classes:
+        # ``is_registered`` is provided by Blender for all RNA classes.
+        if getattr(cls, "is_registered", False):
+            continue
         bpy.utils.register_class(cls)
-    bpy.types.Scene.otpc_props = bpy.props.PointerProperty(type=OctanePointCloudProperties)
+
+    if not hasattr(bpy.types.Scene, "otpc_props"):
+        bpy.types.Scene.otpc_props = bpy.props.PointerProperty(
+            type=OctanePointCloudProperties
+        )
 
 
 def unregister():
-    """Unregister all classes, unload custom icons, and remove props from the Scene."""
+    """Unregister classes and clean up custom properties and icons."""
+
     for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
+        if getattr(cls, "is_registered", False):
+            bpy.utils.unregister_class(cls)
+
     unload_icons()
-    del bpy.types.Scene.otpc_props
+
+    if hasattr(bpy.types.Scene, "otpc_props"):
+        del bpy.types.Scene.otpc_props
