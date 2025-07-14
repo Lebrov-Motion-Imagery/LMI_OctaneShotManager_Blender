@@ -1,3 +1,4 @@
+import bpy
 from bpy.types import PropertyGroup, Operator, UIList
 from bpy.props import PointerProperty, BoolProperty
 
