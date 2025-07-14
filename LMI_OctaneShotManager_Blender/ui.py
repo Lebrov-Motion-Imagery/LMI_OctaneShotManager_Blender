@@ -69,7 +69,11 @@ class POINTCLOUD_PT_panel(Panel):
             row = tag_box.row(align=True)
             row.prop(p, 'tag_frame_start')
             row.prop(p, 'tag_frame_end')
-            row.prop(p, 'tag_chunk_size', text='Chunk')
+
+            row = tag_box.row(align=True)
+            row.prop(p, 'tag_use_chunks')
+            if p.tag_use_chunks:
+                row.prop(p, 'tag_chunk_size', text='Chunk')
             layout.separator()
             
         # PointCloud Baker dropdown

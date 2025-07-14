@@ -50,6 +50,7 @@ def register():
             props = scene.otpc_props
             props.tag_frame_start = scene.frame_start
             props.tag_frame_end = scene.frame_end
+            props.tag_use_chunks = True
             if props.tag_chunk_size <= 0:
                 props.tag_chunk_size = 25
 

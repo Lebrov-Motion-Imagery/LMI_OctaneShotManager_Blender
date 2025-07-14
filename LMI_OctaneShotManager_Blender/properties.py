@@ -160,6 +160,11 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         description="Last frame to export TAGs",
         default=250,
     )
+    tag_use_chunks: BoolProperty(
+        name="Use Chunking",
+        description="Split TAG export into equal sized chunks",
+        default=True,
+    )
     tag_chunk_size: IntProperty(
         name="Chunk Size",
         description="Number of frames per chunk when exporting TAGs",
