@@ -45,6 +45,14 @@ def register():
             type=OctanePointCloudProperties
         )
 
+        # Initialize TAGs frame range properties from the scene
+        for scene in bpy.data.scenes:
+            props = scene.otpc_props
+            props.tag_frame_start = scene.frame_start
+            props.tag_frame_end = scene.frame_end
+            if props.tag_chunk_size <= 0:
+                props.tag_chunk_size = 25
+
 
 def unregister():
     """Unregister classes and clean up custom properties and icons."""

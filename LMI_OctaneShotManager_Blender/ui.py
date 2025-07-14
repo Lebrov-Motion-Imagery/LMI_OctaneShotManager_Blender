@@ -64,6 +64,12 @@ class POINTCLOUD_PT_panel(Panel):
             col = row.column(align=True)
             col.operator('lmb.tag_collection_add', icon='ADD', text='')
             col.operator('lmb.tag_collection_remove', icon='REMOVE', text='')
+
+            tag_box.label(text="Frame Range and Chunk:")
+            row = tag_box.row(align=True)
+            row.prop(p, 'tag_frame_start')
+            row.prop(p, 'tag_frame_end')
+            row.prop(p, 'tag_chunk_size', text='Chunk')
             layout.separator()
             
         # PointCloud Baker dropdown
