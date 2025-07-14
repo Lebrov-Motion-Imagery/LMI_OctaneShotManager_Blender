@@ -53,6 +53,25 @@ class LMB_OT_tag_collection_add(Operator):
                          if isinstance(id, bpy.types.Collection)]
 
         if not selected_cols:
+            # Try to fetch selection from an Outliner area since this operator is
+            # executed from another editor where ``context.selected_ids`` is
+            # empty.
+            for window in context.window_manager.windows:
+                for area in window.screen.areas:
+                    if area.type != 'OUTLINER':
+                        continue
+                    region = next((r for r in area.regions if r.type == 'WINDOW'), None)
+                    if region is None:
+                        continue
+                    with context.temp_override(window=window, area=area, region=region):
+                        selected_cols = [id for id in getattr(bpy.context, "selected_ids", [])
+                                         if isinstance(id, bpy.types.Collection)]
+                    if selected_cols:
+                        break
+                if selected_cols:
+                    break
+
+        if not selected_cols:
             self.report({'INFO'},
                         "There are no collections selected, nothing to add.")
             return {'CANCELLED'}
