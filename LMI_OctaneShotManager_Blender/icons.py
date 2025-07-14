@@ -10,12 +10,20 @@ def load_icons():
     """
     pcoll = bpy.utils.previews.new()
     icons_dir = os.path.join(os.path.dirname(__file__), "Icons")
-    # You can load multiple; here we load one
+    # Load Pointcloud Baker icon
     pcoll.load(
-        "pointcloud_bake",  # internal key
-        os.path.join(icons_dir, "LMI_SOP_Octane_Pointcloud_Bake.svg"),
-        'IMAGE'
+        "pointcloud_bake",
+        os.path.join(icons_dir, "LMI_Octane_Pointcloud_Bake.svg"),
+        'IMAGE',
     )
+
+    # Load Shot Manager icon
+    pcoll.load(
+        "shot_manager",
+        os.path.join(icons_dir, "LMI_Octane_Shot_Manager.svg"),
+        'IMAGE',
+    )
+
     icon_collections['main'] = pcoll
 
 

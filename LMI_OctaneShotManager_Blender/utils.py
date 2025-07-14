@@ -24,6 +24,17 @@ def ensure_directory(path):
     if not os.path.exists(path):
         os.makedirs(path, exist_ok=True)
 
+
+def find_layer_collection(layer_collection, collection):
+    """Recursively find the LayerCollection corresponding to a Collection."""
+    if layer_collection.collection == collection:
+        return layer_collection
+    for child in layer_collection.children:
+        result = find_layer_collection(child, collection)
+        if result:
+            return result
+    return None
+
 # -----------------------------------------------------------------------------
 # Filename Generators
 # -----------------------------------------------------------------------------
@@ -37,6 +48,25 @@ def generate_export_filename(parts, ext):
     """
     name = '_'.join(str(p) for p in parts if p)
     return f"{name}.{ext}"
+
+# -----------------------------------------------------------------------------
+# Prefix Helpers
+# -----------------------------------------------------------------------------
+def sanitize_token(token):
+    """Replace spaces with underscores to keep paths clean."""
+    return str(token).replace(' ', '_') if token else ''
+
+
+def build_scene_shot_prefix(scene_name, shot_name):
+    """Return a prefix string like 'Scene-XXX_Shot-YYY'."""
+    scene_tok = sanitize_token(scene_name)
+    shot_tok = sanitize_token(shot_name)
+    parts = []
+    if scene_tok:
+        parts.append(f"Scene-{scene_tok}")
+    if shot_tok:
+        parts.append(f"Shot-{shot_tok}")
+    return '_'.join(parts)
 
 # -----------------------------------------------------------------------------
 # Matrix Builders
@@ -90,7 +120,7 @@ def timed(func):
 # -----------------------------------------------------------------------------
 # CSV Writer Utility
 # -----------------------------------------------------------------------------
-def write_csv_groups(groups, base_dir, subfolder, overwrite, frame_suffix=None, pc_suffix=False):
+def write_csv_groups(groups, base_dir, subfolder, overwrite, frame_suffix=None, pc_suffix=False, prefix_parts=None):
     """
     Write instance transform groups to CSV files.
 
@@ -100,6 +130,7 @@ def write_csv_groups(groups, base_dir, subfolder, overwrite, frame_suffix=None, 
     :param overwrite: Bool, whether to overwrite existing files
     :param frame_suffix: Optional int to append as frame suffix
     :param pc_suffix: Bool, whether to append '_PC' to object names
+    :param prefix_parts: Optional list of tokens to prepend to filenames
     :returns: None
     """
     out_dir = os.path.join(base_dir, subfolder) if subfolder else base_dir
@@ -110,7 +141,10 @@ def write_csv_groups(groups, base_dir, subfolder, overwrite, frame_suffix=None, 
         # Build base token (with PC suffix if requested)
         base_token = f"{obj_name}_PC" if pc_suffix else obj_name
         # Assemble tokens for filename
-        parts = [base_token]
+        parts = []
+        if prefix_parts:
+            parts.extend(prefix_parts)
+        parts.append(base_token)
         if frame_suffix is not None:
             parts.append(str(frame_suffix))
         filename = generate_export_filename(parts, CSV_EXTENSION)
