@@ -74,6 +74,8 @@ class POINTCLOUD_PT_panel(Panel):
             row.prop(p, 'tag_use_chunks')
             if p.tag_use_chunks:
                 row.prop(p, 'tag_chunk_size', text='Chunk')
+
+            tag_box.operator('lmb.export_tags_orbx', icon='EXPORT')
             layout.separator()
             
         # PointCloud Baker dropdown
