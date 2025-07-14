@@ -23,29 +23,34 @@ class TagCollectionItem(PropertyGroup):
     )
 
     def update_exclude(self, context):
-        coll = self.collection
-        if not coll:
-            return
-        layer = find_layer_collection(context.view_layer.layer_collection, coll)
-        if not layer:
-            return
+        props = context.scene.otpc_props
 
         def toggle_layer(layer_coll, state):
             for lc in layer_coll.children:
                 toggle_layer(lc, state)
                 lc.exclude = state
 
-        if self.exclude:
-            # Solo this collection - disable all others
+        selected_layers = []
+        for item in props.tag_collections:
+            if not item.exclude:
+                continue
+            coll = item.collection
+            if not coll:
+                continue
+            layer = find_layer_collection(context.view_layer.layer_collection, coll)
+            if layer:
+                selected_layers.append(layer)
+
+        if selected_layers:
             toggle_layer(context.view_layer.layer_collection, True)
-            layer.exclude = False
+            for layer in selected_layers:
+                layer.exclude = False
         else:
-            # Re-enable all collections
             toggle_layer(context.view_layer.layer_collection, False)
 
     exclude: BoolProperty(
         name="Solo",
-        description="Disable all collections except this one when enabled",
+        description="Include checked collections only, hiding all others",
         default=False,
         update=update_exclude,
     )
