@@ -26,6 +26,12 @@ class TagCollectionItem(PropertyGroup):
     )
 
 
+class DropCollectionItem(PropertyGroup):
+    """Simple wrapper for dropped collections."""
+
+    collection: PointerProperty(type=bpy.types.Collection)
+
+
 class LMB_UL_tag_collections(UIList):
     """UIList to display tagged collections with exclude toggles."""
 
