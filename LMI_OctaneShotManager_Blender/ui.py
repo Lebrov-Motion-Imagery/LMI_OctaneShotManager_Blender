@@ -59,17 +59,18 @@ class POINTCLOUD_PT_panel(Panel):
 
         if p.show_pointcloud_baker:
             # CSV Settings
-            layout.label(text="CSV Settings", icon='TEXT')
-            layout.prop(p, 'csv_src_type')
+            csv_box = layout.box()
+            csv_box.label(text="CSV Settings", icon='TEXT')
+            csv_box.prop(p, 'csv_src_type')
             if p.csv_src_type == 'OBJECT':
-                layout.prop(p, 'csv_object_source')
+                csv_box.prop(p, 'csv_object_source')
             else:
-                layout.prop(p, 'csv_collection_source')
-            layout.prop(p, 'overwrite_csv')
-            layout.prop(p, 'multi_frame_export')
+                csv_box.prop(p, 'csv_collection_source')
+            csv_box.prop(p, 'overwrite_csv')
+            csv_box.prop(p, 'multi_frame_export')
             if p.multi_frame_export:
-                layout.prop(p, 'frame_range')
-            layout.operator('lmb.export_csv', text="Export CSV", icon='EXPORT')
+                csv_box.prop(p, 'frame_range')
+            csv_box.operator('lmb.export_csv', text="Export CSV", icon='EXPORT')
             layout.separator()
 
             # Alembic Settings
