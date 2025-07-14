@@ -31,6 +31,39 @@ class LMB_OT_export_tags_orbx(Operator):
             return obj.name if obj else ""
         return props.shot_name_manual
 
+    _queue = None
+    _active_file = None
+    _last_size = 0
+
+    def _process_queue(self):
+        """Timer callback that processes the ORBX export queue."""
+        if self._active_file:
+            # Wait until the previous export file exists and size is stable
+            if not os.path.exists(self._active_file):
+                return 0.5
+            size = os.path.getsize(self._active_file)
+            if size != self._last_size:
+                self._last_size = size
+                return 0.5
+            # Export finished
+            self._active_file = None
+
+        if not self._queue:
+            self.report({'INFO'}, "TAG ORBX export completed.")
+            return None
+
+        filepath, filename, start, end = self._queue.pop(0)
+        bpy.ops.export.orbx(
+            filepath=filepath,
+            check_existing=False,
+            filename=filename,
+            frame_start=start,
+            frame_end=end,
+        )
+        self._active_file = filepath
+        self._last_size = os.path.getsize(filepath) if os.path.exists(filepath) else 0
+        return 0.5
+
     def execute(self, context):
         props: OctanePointCloudProperties = context.scene.otpc_props
         collections = [item.collection for item in props.tag_collections if item.collection]
@@ -63,21 +96,15 @@ class LMB_OT_export_tags_orbx(Operator):
         else:
             ranges = [(frame_start, frame_end)]
 
+        self._queue = []
         for coll in collections:
             for start, end in ranges:
                 name_parts = [prefix, coll.name, f"{start}-{end}"]
                 filename = generate_export_filename(name_parts, "orbx")
                 filepath = os.path.join(export_dir, filename)
+                self._queue.append((filepath, filename, start, end))
 
-                bpy.ops.export.orbx(
-                    filepath=filepath,
-                    check_existing=False,
-                    filename=filename,
-                    frame_start=start,
-                    frame_end=end,
-                )
-
-        self.report({'INFO'}, "TAG ORBX export completed.")
+        bpy.app.timers.register(self._process_queue)
         return {'FINISHED'}
 
 
