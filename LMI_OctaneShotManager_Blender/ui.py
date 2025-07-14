@@ -50,6 +50,22 @@ class POINTCLOUD_PT_panel(Panel):
             path_box.prop(p, 'root_output_dir')
             layout.separator()
 
+        # TAGs Workflow dropdown
+        row = layout.row()
+        arrow = 'TRIA_DOWN' if p.show_tags_workflow else 'TRIA_RIGHT'
+        row.prop(p, 'show_tags_workflow', text="", icon=arrow, emboss=False)
+        row.label(text="LMI TAGs Workflow", icon='BOOKMARKS')
+
+        if p.show_tags_workflow:
+            tag_box = layout.box()
+            tag_box.label(text="Choose collections to TAG:")
+            row = tag_box.row()
+            row.template_list('LMB_UL_tag_collections', '', p, 'tag_collections', p, 'tag_collections_index')
+            col = row.column(align=True)
+            col.operator('lmb.tag_collection_add', icon='ADD', text='')
+            col.operator('lmb.tag_collection_remove', icon='REMOVE', text='')
+            layout.separator()
+            
         # PointCloud Baker dropdown
         row = layout.row()
         arrow = 'TRIA_DOWN' if p.show_pointcloud_baker else 'TRIA_RIGHT'

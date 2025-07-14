@@ -24,6 +24,17 @@ def ensure_directory(path):
     if not os.path.exists(path):
         os.makedirs(path, exist_ok=True)
 
+
+def find_layer_collection(layer_collection, collection):
+    """Recursively find the LayerCollection corresponding to a Collection."""
+    if layer_collection.collection == collection:
+        return layer_collection
+    for child in layer_collection.children:
+        result = find_layer_collection(child, collection)
+        if result:
+            return result
+    return None
+
 # -----------------------------------------------------------------------------
 # Filename Generators
 # -----------------------------------------------------------------------------

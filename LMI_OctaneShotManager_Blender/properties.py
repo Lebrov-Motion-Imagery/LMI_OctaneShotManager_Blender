@@ -4,7 +4,11 @@ from bpy.props import (
     EnumProperty,
     PointerProperty,
     StringProperty,
+    CollectionProperty,
+    IntProperty,
 )
+
+from .tags_workflow import TagCollectionItem
 
 
 class OctanePointCloudProperties(bpy.types.PropertyGroup):
@@ -136,3 +140,11 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         description="Display scene and shot naming options",
         default=True,
     )
+    show_tags_workflow: BoolProperty(
+        name="Show TAGs Workflow",
+        description="Display LMI TAGs Workflow settings",
+        default=False,
+    )
+
+    tag_collections: CollectionProperty(type=TagCollectionItem)
+    tag_collections_index: IntProperty(default=-1)
