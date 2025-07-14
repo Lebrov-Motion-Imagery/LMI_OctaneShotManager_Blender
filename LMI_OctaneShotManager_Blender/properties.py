@@ -35,7 +35,7 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
 
     # Multi-frame export
     multi_frame_export: BoolProperty(
-        name="Multi-frame Export",
+        name="Multi-frame CSVs Export",
         description="Enable exporting CSVs over a frame sequence",
         default=False,
     )
