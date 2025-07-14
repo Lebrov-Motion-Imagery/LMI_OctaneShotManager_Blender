@@ -64,6 +64,7 @@ class POINTCLOUD_PT_panel(Panel):
             col = row.column(align=True)
             col.operator('lmb.tag_collection_add', icon='ADD', text='')
             col.operator('lmb.tag_collection_remove', icon='REMOVE', text='')
+            tag_box.operator('lmb.export_tags_orbx', icon='EXPORT', text='Export All Tags to ORBX')
             layout.separator()
             
         # PointCloud Baker dropdown
