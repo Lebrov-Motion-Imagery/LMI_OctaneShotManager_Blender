@@ -96,17 +96,19 @@ class LMB_OT_export_orbx_tags(Operator):
             for start, end in ranges:
                 filename = generate_export_filename([base_name, f"{start}-{end}"], ORBX_EXTENSION)
                 filepath = os.path.abspath(os.path.join(base_dir, filename))
-                result = bpy.ops.export.orbx(
-                    'EXEC_DEFAULT',
-                    filepath=filepath,
-                    check_existing=True,
-                    filename=os.path.basename(filepath),
-                    frame_start=start,
-                    frame_end=end,
-                    frame_subframe=0.0,
-                    filter_glob="*.orbx"
+
+                command = (
+                    "bpy.ops.export.orbx('EXEC_DEFAULT', "
+                    f"filepath=r'{filepath}', "
+                    "check_existing=True, "
+                    f"filename='{os.path.basename(filepath)}', "
+                    f"frame_start={start}, "
+                    f"frame_end={end}, "
+                    "frame_subframe=0.0, filter_glob='*.orbx')"
                 )
-                print(f"ORBX export finished: {result} → {filepath}")
+
+                result = eval(command)
+                print(f"Executed: {command}\nORBX export finished: {result} → {filepath}")
                 exported += 1
 
         for lc, val in original_states.items():
