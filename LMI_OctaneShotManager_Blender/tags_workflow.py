@@ -1,8 +1,16 @@
 import bpy
+import os
 from bpy.types import PropertyGroup, Operator, UIList
 from bpy.props import PointerProperty, BoolProperty
 
-from .utils import find_layer_collection
+from .utils import (
+    find_layer_collection,
+    ensure_directory,
+    generate_export_filename,
+    build_scene_shot_prefix,
+    ORBX_EXTENSION,
+    chunk_frame_range,
+)
 
 
 def _is_parent_of(parent, child):
@@ -140,11 +148,66 @@ class LMB_OT_tag_collection_remove(Operator):
         return {'FINISHED'}
 
 
+class LMB_OT_export_tags_orbx(Operator):
+    """Export all tagged collections to ORBX files."""
+    bl_idname = "lmb.export_tags_orbx"
+    bl_label = "Export All TAGs to ORBX"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        props = context.scene.otpc_props
+
+        def resolve_scene_name():
+            if props.scene_name_source == 'FILE':
+                filepath = bpy.data.filepath
+                return os.path.splitext(os.path.basename(filepath))[0] if filepath else ""
+            if props.scene_name_source == 'SCENE':
+                return context.scene.name
+            return props.scene_name_manual
+
+        def resolve_shot_name():
+            if props.shot_name_source == 'OBJECT':
+                obj = props.shot_object_source
+                return obj.name if obj else ""
+            return props.shot_name_manual
+
+        scene_name = resolve_scene_name()
+        shot_name = resolve_shot_name()
+
+        base_root = bpy.path.abspath(props.root_output_dir)
+        prefix = build_scene_shot_prefix(scene_name, shot_name)
+        base_dir = os.path.join(base_root, "Shot_Manager", "TAGs", prefix)
+        ensure_directory(base_dir)
+
+        frame_start = props.tag_frame_start
+        frame_end = props.tag_frame_end
+        ranges = [(frame_start, frame_end)]
+        if props.tag_use_chunks:
+            ranges = chunk_frame_range(frame_start, frame_end, max(1, props.tag_chunk_size))
+
+        for item in props.tag_collections:
+            coll = item.collection
+            if not coll:
+                continue
+            coll_name = coll.name
+            for r_start, r_end in ranges:
+                parts = [prefix, coll_name, f"{r_start}-{r_end}"]
+                filename = generate_export_filename(parts, ORBX_EXTENSION)
+                filepath = os.path.join(base_dir, filename)
+                bpy.ops.export.orbx(filepath=filepath,
+                                    frame_start=r_start,
+                                    frame_end=r_end)
+
+        self.report({'INFO'}, "ORBX TAG export completed.")
+        return {'FINISHED'}
+
+
 classes = (
     TagCollectionItem,
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_remove,
+    LMB_OT_export_tags_orbx,
 )
 
 

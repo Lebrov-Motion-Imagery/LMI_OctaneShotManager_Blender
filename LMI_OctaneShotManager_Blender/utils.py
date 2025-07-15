@@ -10,6 +10,7 @@ import csv
 # -----------------------------------------------------------------------------
 CSV_EXTENSION = 'csv'
 ABC_EXTENSION = 'abc'
+ORBX_EXTENSION = 'orbx'
 
 # -----------------------------------------------------------------------------
 # Directory Helpers
@@ -190,4 +191,15 @@ def parse_frame_range(frame_range_str):
             except ValueError:
                 continue
     return sorted(frames)
+
+
+def chunk_frame_range(start, end, chunk_size):
+    """Return list of (start, end) tuples split into chunk_size increments."""
+    ranges = []
+    cur = start
+    while cur <= end:
+        chunk_end = min(cur + chunk_size - 1, end)
+        ranges.append((cur, chunk_end))
+        cur = chunk_end + 1
+    return ranges
 

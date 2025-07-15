@@ -9,6 +9,7 @@ from .tags_workflow import (
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_remove,
+    LMB_OT_export_tags_orbx,
 )
 from .ui import POINTCLOUD_PT_panel
 
@@ -22,6 +23,7 @@ classes = (
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_remove,
+    LMB_OT_export_tags_orbx,
     POINTCLOUD_PT_panel,
 )
 
