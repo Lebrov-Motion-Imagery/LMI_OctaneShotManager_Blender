@@ -121,8 +121,12 @@ class LMB_OT_export_tags_orbx(Operator):
         cls = self.__class__
         cls._queue = []
         cls._view_layer = context.view_layer
-        for coll in collections:
-            for start, end in ranges:
+
+        # Build the queue so that we iterate chunks first then collections. This
+        # helps the Octane server flush resources between different collections
+        # more reliably when chunked exports are enabled.
+        for start, end in ranges:
+            for coll in collections:
                 name_parts = [prefix, coll.name, f"{start}-{end}"]
                 filename = generate_export_filename(name_parts, "orbx")
                 filepath = os.path.join(export_dir, filename)
