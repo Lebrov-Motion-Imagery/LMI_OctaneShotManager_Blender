@@ -10,6 +10,7 @@ import csv
 # -----------------------------------------------------------------------------
 CSV_EXTENSION = 'csv'
 ABC_EXTENSION = 'abc'
+ORBX_EXTENSION = 'orbx'
 
 # -----------------------------------------------------------------------------
 # Directory Helpers
@@ -190,4 +191,13 @@ def parse_frame_range(frame_range_str):
             except ValueError:
                 continue
     return sorted(frames)
+
+
+def iter_chunk_ranges(start, end, size):
+    """Yield inclusive frame range tuples split by ``size``."""
+    size = max(1, int(size))
+    for s in range(int(start), int(end) + 1, size):
+        e = min(s + size - 1, int(end))
+        yield s, e
+
 
