@@ -68,11 +68,23 @@ class LMB_OT_export_tags_orbx(Operator):
             for c in layer.children:
                 set_all(c, state)
 
+        def find_parent(target, current):
+            for child in current.children:
+                if child == target:
+                    return current
+                res = find_parent(target, child)
+                if res:
+                    return res
+            return None
+
         def unexclude_parents(layer):
             if layer is None:
                 return
             layer.exclude = False
-            unexclude_parents(layer.parent)
+            parent = getattr(layer, "parent", None)
+            if parent is None:
+                parent = find_parent(layer, root_layer)
+            unexclude_parents(parent)
 
         def unexclude_children(layer):
             for c in layer.children:

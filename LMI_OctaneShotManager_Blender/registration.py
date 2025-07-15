@@ -48,10 +48,11 @@ def register():
         )
 
         # Initialize TAGs frame range properties from the scene
-        for scene in bpy.data.scenes:
-            props = scene.otpc_props
-            props.tag_frame_start = scene.frame_start
-            props.tag_frame_end = scene.frame_end
+        scenes = getattr(bpy.data, "scenes", [])
+        for scn in scenes:
+            props = scn.otpc_props
+            props.tag_frame_start = scn.frame_start
+            props.tag_frame_end = scn.frame_end
             props.tag_use_chunks = True
             if props.tag_chunk_size <= 0:
                 props.tag_chunk_size = 25
