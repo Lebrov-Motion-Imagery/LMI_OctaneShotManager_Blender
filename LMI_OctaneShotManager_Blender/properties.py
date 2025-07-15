@@ -129,6 +129,34 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         default=False,
     )
 
+    # ORBX export settings used in TAGs workflow
+    tag_frame_start: IntProperty(
+        name="Start Frame",
+        description="First frame to export",
+        default=1,
+    )
+    tag_frame_end: IntProperty(
+        name="End Frame",
+        description="Last frame to export",
+        default=250,
+    )
+    tag_use_chunking: BoolProperty(
+        name="Use Chunking",
+        description="Split ORBX export into sequential frame chunks",
+        default=False,
+    )
+    tag_chunk_size: IntProperty(
+        name="Chunk Size",
+        description="Number of frames per ORBX chunk",
+        default=25,
+        min=1,
+    )
+    overwrite_orbx: BoolProperty(
+        name="Overwrite ORBX",
+        description="Allow overwriting existing ORBX files",
+        default=False,
+    )
+
     # UI toggles
     show_pointcloud_baker: BoolProperty(
         name="Show PointCloud Baker",

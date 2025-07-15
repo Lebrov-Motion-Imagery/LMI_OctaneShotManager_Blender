@@ -64,6 +64,13 @@ class POINTCLOUD_PT_panel(Panel):
             col = row.column(align=True)
             col.operator('lmb.tag_collection_add', icon='ADD', text='')
             col.operator('lmb.tag_collection_remove', icon='REMOVE', text='')
+            tag_box.prop(p, 'tag_frame_start')
+            tag_box.prop(p, 'tag_frame_end')
+            tag_box.prop(p, 'tag_use_chunking')
+            if p.tag_use_chunking:
+                tag_box.prop(p, 'tag_chunk_size')
+            tag_box.prop(p, 'overwrite_orbx')
+            tag_box.operator('lmb.export_orbx_tags', text="Export All Tags to ORBX", icon='EXPORT')
             layout.separator()
             
         # PointCloud Baker dropdown
