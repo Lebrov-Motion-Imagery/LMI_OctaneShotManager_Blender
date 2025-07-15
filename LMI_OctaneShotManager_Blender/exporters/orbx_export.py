@@ -98,13 +98,20 @@ class LMB_OT_export_tags_orbx(Operator):
                 filename = generate_export_filename(name_parts, "orbx")
                 filepath = os.path.join(export_dir, filename)
                 print(f"[DEBUG] exporting {coll.name} frames {start}-{end} to {filepath}")
-                bpy.ops.export.orbx(
+                if os.path.exists(filepath) and not props.overwrite_orbx:
+                    print(f"[DEBUG] skipping existing {filepath}")
+                    continue
+                result = bpy.ops.export.orbx(
                     filepath=filepath,
-                    check_existing=False,
+                    check_existing=not props.overwrite_orbx,
                     filename=filename,
                     frame_start=start,
                     frame_end=end,
+                    frame_subframe=0,
+                    filter_glob="*.orbx",
                 )
+                print(f"[DEBUG] export result: {result}")
+                bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
         cls._restore_layers()
         print("TAG ORBX export completed.")

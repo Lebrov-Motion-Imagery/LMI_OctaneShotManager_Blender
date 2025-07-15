@@ -75,6 +75,8 @@ class POINTCLOUD_PT_panel(Panel):
             if p.tag_use_chunks:
                 row.prop(p, 'tag_chunk_size', text='Chunk')
 
+            tag_box.prop(p, 'overwrite_orbx')
+
             tag_box.operator('lmb.export_tags_orbx', icon='EXPORT')
             layout.separator()
             
