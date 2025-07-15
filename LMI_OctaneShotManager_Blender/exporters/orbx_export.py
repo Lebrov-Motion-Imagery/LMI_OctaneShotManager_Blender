@@ -79,6 +79,8 @@ class LMB_OT_export_orbx_tags(Operator):
             for ch in layer_coll.children:
                 unhide_children(ch)
 
+        scene = context.scene
+
         exported = 0
         for item in props.tag_collections:
             coll = item.collection
@@ -92,10 +94,20 @@ class LMB_OT_export_orbx_tags(Operator):
             unhide_path(target_layer)
             unhide_children(target_layer)
 
+            # Ensure the depsgraph reflects our layer visibility changes
+            try:
+                context.view_layer.update()
+            except AttributeError:
+                pass
+
             base_name = f"{prefix}_{coll.name}"
             for start, end in ranges:
                 filename = generate_export_filename([base_name, f"{start}-{end}"], ORBX_EXTENSION)
                 filepath = os.path.abspath(os.path.join(base_dir, filename))
+
+                # Adjust scene frame range to match the export range
+                scene.frame_start = start
+                scene.frame_end = end
 
                 result = bpy.ops.export.orbx(
                     'EXEC_DEFAULT',
@@ -108,10 +120,16 @@ class LMB_OT_export_orbx_tags(Operator):
                     filter_glob='*.orbx'
                 )
 
+                # Wait until the file appears to ensure sequential exports
+                import time
+                t0 = time.time()
+                while not os.path.exists(filepath) and time.time() - t0 < 120:
+                    time.sleep(0.5)
+
                 print(
                     f"ORBX export finished: {result} \u2192 {filepath}"
                 )
-                if result == {'FINISHED'}:
+                if 'FINISHED' in result:
                     exported += 1
 
         for lc, val in original_states.items():
