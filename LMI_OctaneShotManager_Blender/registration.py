@@ -47,8 +47,9 @@ def register():
             type=OctanePointCloudProperties
         )
 
-        # Initialize TAGs frame range properties from the scene
-        for scene in bpy.data.scenes:
+        # Initialize TAGs frame range properties from the scene if accessible
+        scenes = getattr(bpy.data, "scenes", [])
+        for scene in scenes:
             props = scene.otpc_props
             props.tag_frame_start = scene.frame_start
             props.tag_frame_end = scene.frame_end
