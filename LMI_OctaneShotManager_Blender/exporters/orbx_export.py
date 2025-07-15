@@ -22,6 +22,7 @@ class LMB_OT_export_tags_orbx(Operator):
     _current = None
     _log_file = None
     _log_pos = 0
+    _log_checked = False
     _view_layer = None
 
     # ------------------------------------------------------------------
@@ -39,32 +40,33 @@ class LMB_OT_export_tags_orbx(Operator):
         layer = find_layer_collection(cls._view_layer.layer_collection, collection)
         if layer:
             layer.exclude = False
-        print(f"[DEBUG] soloed collection {collection.name}")
+        return
 
     @classmethod
     def _restore_layers(cls):
         cls._toggle_layer(cls._view_layer.layer_collection, False)
-        print("[DEBUG] restored layer visibility")
+        return
 
     @classmethod
     def _open_log(cls):
         """Open Octane server log for monitoring if available."""
-        if cls._log_file:
+        if cls._log_checked:
             return
+        cls._log_checked = True
         try:
-            cfg_dir = bpy.utils.user_resource('CONFIG')
-            log_path = os.path.join(cfg_dir, "OctaneServer.log")
-            cls._log_file = open(log_path, 'r', encoding='utf-8')
-            cls._log_file.seek(0, os.SEEK_END)
-            cls._log_pos = cls._log_file.tell()
-            print(f"[DEBUG] monitoring log {log_path}")
-        except Exception as exc:
-            print(f"[DEBUG] failed to open Octane log: {exc}")
-            cls._log_file = None
+            log_path = bpy.utils.user_resource('CONFIG', "OctaneServer.log", create=False)
+            if log_path and os.path.exists(log_path):
+                cls._log_file = open(log_path, 'r', encoding='utf-8')
+                cls._log_file.seek(0, os.SEEK_END)
+                cls._log_pos = cls._log_file.tell()
+            else:
+                cls._log_file = False
+        except Exception:
+            cls._log_file = False
 
     @classmethod
     def _read_log(cls):
-        if not cls._log_file:
+        if not cls._log_file or cls._log_file is False:
             return []
         cls._log_file.seek(cls._log_pos)
         lines = cls._log_file.readlines()
@@ -90,7 +92,6 @@ class LMB_OT_export_tags_orbx(Operator):
             'filepath': filepath,
             'filename': filename,
         }
-        print(f"[DEBUG] starting export {filename}")
         bpy.ops.export.orbx(
             filepath=filepath,
             check_existing=not props.overwrite_orbx,
@@ -106,12 +107,24 @@ class LMB_OT_export_tags_orbx(Operator):
     def _process_queue(cls):
         props = bpy.context.scene.otpc_props
         cls._open_log()
-        for line in cls._read_log():
-            if 'Exporting frame' in line:
-                print(line)
-            if cls._current and 'Export Success' in line and cls._current['filename'] in line:
-                print(f"[DEBUG] finished {cls._current['filename']}")
-                cls._current = None
+        if cls._current:
+            if cls._log_file not in (None, False):
+                for line in cls._read_log():
+                    if 'Export Success' in line and cls._current['filename'] in line:
+                        cls._current = None
+                        break
+            else:
+                path = cls._current['filepath']
+                if os.path.exists(path):
+                    size = os.path.getsize(path)
+                    last = cls._current.get('last_size', -1)
+                    if size != last:
+                        cls._current['last_size'] = size
+                        cls._current['stable'] = 0
+                    else:
+                        cls._current['stable'] = cls._current.get('stable', 0) + 1
+                        if cls._current['stable'] >= 4:
+                            cls._current = None
 
         if cls._current:
             return 0.5
@@ -172,7 +185,7 @@ class LMB_OT_export_tags_orbx(Operator):
         cls._current = None
         cls._view_layer = context.view_layer
 
-        print(f"[DEBUG] preparing exports for {len(collections)} collections {ranges}")
+
 
         for coll in collections:
             for start, end in ranges:
@@ -180,7 +193,6 @@ class LMB_OT_export_tags_orbx(Operator):
                 filename = generate_export_filename(name_parts, "orbx")
                 filepath = os.path.join(export_dir, filename)
                 if os.path.exists(filepath) and not props.overwrite_orbx:
-                    print(f"[DEBUG] skipping existing {filepath}")
                     continue
                 cls._queue.append((coll, filepath, filename, start, end))
 
