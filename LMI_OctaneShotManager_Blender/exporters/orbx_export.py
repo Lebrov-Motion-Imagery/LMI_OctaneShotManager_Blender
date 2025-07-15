@@ -7,6 +7,7 @@ from ..utils import (
     ensure_directory,
     generate_export_filename,
     build_scene_shot_prefix,
+    find_layer_collection,
 )
 
 
@@ -34,6 +35,21 @@ class LMB_OT_export_tags_orbx(Operator):
     _queue = None
     _active_file = None
     _last_size = 0
+    _view_layer = None
+
+    def _toggle_layer(self, layer_coll, state):
+        for child in layer_coll.children:
+            self._toggle_layer(child, state)
+            child.exclude = state
+
+    def _solo_collection(self, collection):
+        self._toggle_layer(self._view_layer.layer_collection, True)
+        layer = find_layer_collection(self._view_layer.layer_collection, collection)
+        if layer:
+            layer.exclude = False
+
+    def _restore_layers(self):
+        self._toggle_layer(self._view_layer.layer_collection, False)
 
     def _process_queue(self):
         """Timer callback that processes the ORBX export queue."""
@@ -49,10 +65,12 @@ class LMB_OT_export_tags_orbx(Operator):
             self._active_file = None
 
         if not self._queue:
+            self._restore_layers()
             self.report({'INFO'}, "TAG ORBX export completed.")
             return None
 
-        filepath, filename, start, end = self._queue.pop(0)
+        collection, filepath, filename, start, end = self._queue.pop(0)
+        self._solo_collection(collection)
         bpy.ops.export.orbx(
             filepath=filepath,
             check_existing=False,
@@ -97,12 +115,13 @@ class LMB_OT_export_tags_orbx(Operator):
             ranges = [(frame_start, frame_end)]
 
         self._queue = []
+        self._view_layer = context.view_layer
         for coll in collections:
             for start, end in ranges:
                 name_parts = [prefix, coll.name, f"{start}-{end}"]
                 filename = generate_export_filename(name_parts, "orbx")
                 filepath = os.path.join(export_dir, filename)
-                self._queue.append((filepath, filename, start, end))
+                self._queue.append((coll, filepath, filename, start, end))
 
         bpy.app.timers.register(self._process_queue)
         return {'FINISHED'}
