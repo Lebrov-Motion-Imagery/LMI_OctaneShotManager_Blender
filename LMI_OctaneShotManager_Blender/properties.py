@@ -148,3 +148,28 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
 
     tag_collections: CollectionProperty(type=TagCollectionItem)
     tag_collections_index: IntProperty(default=-1)
+
+    tags_frame_start: IntProperty(
+        name="Start Frame",
+        description="First frame for TAGs export",
+        default=1,
+    )
+
+    tags_frame_end: IntProperty(
+        name="End Frame",
+        description="Last frame for TAGs export",
+        default=250,
+    )
+
+    tags_use_chunking: BoolProperty(
+        name="Use Chunking",
+        description="Split export frame range into sequential chunks",
+        default=False,
+    )
+
+    tags_chunk_size: IntProperty(
+        name="Chunk Size",
+        description="Number of frames per chunk",
+        default=25,
+        min=1,
+    )
