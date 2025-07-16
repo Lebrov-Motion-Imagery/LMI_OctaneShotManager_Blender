@@ -10,7 +10,8 @@ LMI_OctaneShotManager_Blender/
 ├── icons.py                                # Icon loading helpers
 ├── exporters/                              # Contains exporters logic
 │   ├── csv_export.py                       # CSV export operator & related helpers
-│   └── abc_export.py                       # Alembic export operator & face_sets logic
+│   ├── abc_export.py                       # Alembic export operator & face_sets logic
+│   └── orbx_export.py                      # ORBX export operator for TAGs
 ├── standalone_scripts/                     # Contains standalone scripts for specific tasks
 │   └── ORBXmerger.lua                      # Tool for merging ORBX files
 ├── Icons/                                  # Contains icons used in the addon
