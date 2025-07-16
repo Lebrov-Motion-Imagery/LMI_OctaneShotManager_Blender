@@ -98,7 +98,12 @@ def parse_orbx_sequence(export_dir, base_name):
 
 
 def filter_missing_parts(parts, export_dir, base_name, overwrite, chunk_size=None):
-    """Return subset of parts that need exporting with numbering adjusted."""
+    """Return subset of parts that need exporting with numbering adjusted.
+
+    When ``overwrite`` is ``True`` mismatched existing chunks are deleted so they
+    can be replaced. If ``overwrite`` is ``False`` and a chunk differs from what
+    is on disk, an error is raised prompting the user to enable overwriting.
+    """
     # When chunk_size is ``None`` we skip all chunk detection logic and simply
     # check whether the resulting files exist. This mode is used when the user
     # disables chunking entirely.
@@ -152,10 +157,10 @@ def filter_missing_parts(parts, export_dir, base_name, overwrite, chunk_size=Non
                 "Requested start frame does not match existing sequence. "
                 f"Use {first_frame} as start frame."
             )
-        if req_end is not None and req_end != last_frame:
+        if req_end is not None and req_end < last_frame:
             raise ValueError(
-                "Requested end frame does not match existing sequence. "
-                f"Use {last_frame} as end frame."
+                "Requested end frame is before existing sequence end. "
+                f"Use {last_frame} or later as end frame."
             )
 
     chunk = exist_chunk or req_chunk
@@ -166,6 +171,14 @@ def filter_missing_parts(parts, export_dir, base_name, overwrite, chunk_size=Non
     )
 
     existing_map = {pn: (s, e) for pn, s, e in existing_parts}
+
+    def delete_mismatched(pn, s, e):
+        name = f"{base_name}_pt{pn}_{s:03d}-{e:03d}.orbx"
+        path = os.path.join(export_dir, name)
+        try:
+            os.remove(path)
+        except FileNotFoundError:
+            pass
 
     results = []
     for _, frm, to in parts:
@@ -181,6 +194,17 @@ def filter_missing_parts(parts, export_dir, base_name, overwrite, chunk_size=Non
             raise ValueError(
                 f"Frame range {frm}-{to} does not align with chunk size {chunk}."
             )
+
+        existing = existing_map.get(part_no)
+        if existing and existing != (frm, to):
+            if overwrite:
+                delete_mismatched(part_no, *existing)
+            else:
+                raise ValueError(
+                    f"Chunk {part_no} on disk is {existing[0]}-{existing[1]}, "
+                    f"but expected {frm}-{to}. Enable 'Overwrite ORBX' to "
+                    "replace it."
+                )
 
         filename = f"{base_name}_pt{part_no}_{frm:03d}-{to:03d}.orbx"
         filepath = os.path.join(export_dir, filename)
