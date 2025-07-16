@@ -8,6 +8,8 @@ This repository contains a Blender add-on. Please adhere to the following guidel
 - Keep modules small and focused on a single responsibility to encourage a modular code base.
 - Reuse helper logic via functions or classes in `utils.py` whenever possible.
 - Use or create utils.py for helper functions related only to particular workflow, and cant be reused as pure-python functions. 
+- Any new workflow should be created as a new folder inside Workflows folder.
+- Any new general exporter function has to be created withtin exporters folder.
 
 ## Naming Conventions
 - File names use `snake_case` (e.g. `example_module.py`).
