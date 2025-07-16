@@ -1,5 +1,6 @@
 import bpy
 import os
+import re
 from ...utils import find_layer_collection
 
 
@@ -57,13 +58,107 @@ def chunk_frame_ranges(start, end, step):
     return chunks
 
 
-def export_orbx_chunk(frame_start, frame_end, export_dir, base_name):
+def calculate_part_ranges(start, end, chunk):
+    """Return list of (part_no, start, end) tuples for the given range."""
+    ranges = []
+    cur = start
+    part_no = 1
+    while cur <= end:
+        chunk_end = min(cur + chunk - 1, end)
+        ranges.append((part_no, cur, chunk_end))
+        cur = chunk_end + 1
+        part_no += 1
+    return ranges
+
+
+_ORBX_RE = re.compile(r"^(?P<base>.+)_pt(?P<part>\d+)_(?P<start>\d+)-(?P<end>\d+)\.orbx$", re.I)
+
+
+def parse_orbx_sequence(export_dir, base_name):
+    """Parse existing ORBX files and return parts and chunk sizes."""
+    parts = []
+    chunk_sizes = set()
+    if not os.path.isdir(export_dir):
+        return parts, chunk_sizes
+
+    for fname in os.listdir(export_dir):
+        m = _ORBX_RE.match(fname)
+        if not m:
+            continue
+        if not fname.startswith(base_name + "_"):
+            continue
+        part_no = int(m.group("part"))
+        start_f = int(m.group("start"))
+        end_f = int(m.group("end"))
+        parts.append((part_no, start_f, end_f))
+        chunk_sizes.add(end_f - start_f + 1)
+
+    parts.sort(key=lambda x: x[0])
+    return parts, chunk_sizes
+
+
+def filter_missing_parts(parts, export_dir, base_name, overwrite):
+    """Return subset of parts that need exporting with numbering adjusted."""
+    existing_parts, chunk_sizes = parse_orbx_sequence(export_dir, base_name)
+
+    if parts:
+        req_chunk = max(to - frm + 1 for _, frm, to in parts)
+    else:
+        req_chunk = 0
+
+    exist_chunk = None
+    if chunk_sizes:
+        # Choose the most common chunk size (ignoring the last shorter chunk)
+        counts = {c: 0 for c in chunk_sizes}
+        for c in chunk_sizes:
+            counts[c] += 1
+        exist_chunk = max(counts, key=counts.get)
+
+    if exist_chunk and req_chunk and exist_chunk != req_chunk:
+        raise ValueError(
+            f"Existing ORBX sequence uses chunk size {exist_chunk}, but requested {req_chunk}."
+        )
+
+    chunk = exist_chunk or req_chunk
+    base_start = (
+        min((s for _, s, _ in existing_parts), default=parts[0][1] if parts else 1)
+        if chunk
+        else (parts[0][1] if parts else 1)
+    )
+
+    existing_map = {pn: (s, e) for pn, s, e in existing_parts}
+
+    results = []
+    for _, frm, to in parts:
+        part_no = ((frm - base_start) // chunk) + 1 if chunk else 1
+        expected_start = base_start + (part_no - 1) * chunk
+        expected_end = expected_start + chunk - 1
+        if frm != expected_start:
+            raise ValueError(
+                f"Frame range {frm}-{to} does not align with chunk size {chunk}. "
+                f"Expected start {expected_start}."
+            )
+        if to != min(expected_end, to):
+            raise ValueError(
+                f"Frame range {frm}-{to} does not align with chunk size {chunk}."
+            )
+
+        filename = f"{base_name}_pt{part_no}_{frm:03d}-{to:03d}.orbx"
+        filepath = os.path.join(export_dir, filename)
+        if os.path.exists(filepath) and not overwrite:
+            continue
+        results.append((part_no, frm, to))
+
+    return results
+
+
+def export_orbx_chunk(part_no, frame_start, frame_end, export_dir, base_name):
     """Launch ORBX export for a frame chunk and return filepath."""
     scene = bpy.context.scene
     scene.frame_start = frame_start
     scene.frame_end = frame_end
 
-    name = f"{base_name}_{frame_start:03d}-{frame_end:03d}.orbx"
+    name = f"{base_name}_pt{part_no}_{frame_start:03d}-{frame_end:03d}.orbx"
     filepath = os.path.join(export_dir, name)
 
     bpy.ops.export.orbx(
@@ -92,15 +187,15 @@ def make_orbx_export_manager(task_queue, export_dir, prefix, overwrite, poll_int
     def manager():
         if state['waiting_for'] is None:
             while task_queue:
-                coll, frm, to = task_queue.pop(0)
+                coll, part_no, frm, to = task_queue.pop(0)
                 solo_collection(bpy.context, coll)
                 base_name = f"{prefix}_{coll.name}"
-                filename = f"{base_name}_{frm:03d}-{to:03d}.orbx"
+                filename = f"{base_name}_pt{part_no}_{frm:03d}-{to:03d}.orbx"
                 filepath = os.path.join(export_dir, filename)
                 if os.path.exists(filepath) and not overwrite:
                     print(f"Skipping existing {filename}")
                     continue
-                fp = export_orbx_chunk(frm, to, export_dir, base_name)
+                fp = export_orbx_chunk(part_no, frm, to, export_dir, base_name)
                 state['waiting_for'] = fp
                 state['current_fp'] = fp
                 return poll_interval
