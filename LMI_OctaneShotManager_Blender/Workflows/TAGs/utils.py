@@ -113,17 +113,37 @@ def filter_missing_parts(parts, export_dir, base_name, overwrite, chunk_size=Non
     # Determine the prevalent chunk size among existing parts so we don't rely
     # on the last (often shorter) chunk in the sequence.
     exist_chunk = None
+    first_frame = None
+    last_frame = None
     if existing_parts:
         counts = {}
         for _, start_f, end_f in existing_parts:
             c = end_f - start_f + 1
             counts[c] = counts.get(c, 0) + 1
         exist_chunk = max(sorted(counts.items()), key=lambda kv: kv[1])[0]
+        first_frame = min(s for _, s, _ in existing_parts)
+        last_frame = max(e for _, _, e in existing_parts)
 
     if exist_chunk and req_chunk and exist_chunk != req_chunk:
         raise ValueError(
-            f"Existing ORBX sequence uses chunk size {exist_chunk}, but requested {req_chunk}."
+            "Existing ORBX sequence uses chunk size "
+            f"{exist_chunk}, but requested {req_chunk}. "
+            f"Use chunk size {exist_chunk}."
         )
+
+    if overwrite and existing_parts:
+        req_start = parts[0][1] if parts else None
+        req_end = parts[-1][2] if parts else None
+        if req_start is not None and req_start != first_frame:
+            raise ValueError(
+                "Requested start frame does not match existing sequence. "
+                f"Use {first_frame} as start frame."
+            )
+        if req_end is not None and req_end != last_frame:
+            raise ValueError(
+                "Requested end frame does not match existing sequence. "
+                f"Use {last_frame} as end frame."
+            )
 
     chunk = exist_chunk or req_chunk
     base_start = (
