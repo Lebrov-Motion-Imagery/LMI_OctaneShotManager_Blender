@@ -37,5 +37,9 @@ def cycle_tag_collections(context):
 
     props.tag_cycle_index = (props.tag_cycle_index + 1) % len(collections)
     coll = collections[props.tag_cycle_index]
+
+    for item in props.tag_collections:
+        item["exclude"] = item.collection == coll
+
     solo_collection(context, coll)
     return coll
