@@ -9,7 +9,8 @@ from ..utils import (
 )
 from ..Workflows.TAGs.utils import (
     get_tagged_collections,
-    chunk_frame_ranges,
+    calculate_part_ranges,
+    filter_missing_parts,
     make_orbx_export_manager,
 )
 
@@ -56,12 +57,25 @@ class LMB_OT_export_orbx_tags(Operator):
         use_chunks = props.tag_use_chunks
         chunk_size = max(1, props.tag_chunk_size)
 
-        ranges = chunk_frame_ranges(frame_start, frame_end, chunk_size) if use_chunks else [(frame_start, frame_end)]
+        part_ranges = calculate_part_ranges(
+            frame_start,
+            frame_end,
+            chunk_size if use_chunks else frame_end - frame_start + 1,
+        )
 
         task_queue = []
         for coll in collections:
-            for frm, to in ranges:
-                task_queue.append((coll, frm, to))
+            base_name = f"{prefix}_{coll.name}"
+            try:
+                parts = filter_missing_parts(
+                    part_ranges, export_dir, base_name, props.overwrite_orbx
+                )
+            except ValueError as exc:
+                self.report({'ERROR'}, str(exc))
+                return {'CANCELLED'}
+
+            for part_no, frm, to in parts:
+                task_queue.append((coll, part_no, frm, to))
 
         export_manager = make_orbx_export_manager(task_queue, export_dir, prefix, props.overwrite_orbx, poll_interval=3.0)
         bpy.app.timers.register(export_manager, first_interval=0.0)
