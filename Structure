@@ -1,17 +1,18 @@
 LMI_OctaneShotManager_Blender/
-├── __init__.py            # bl_info + top-level register/unregister
-├── properties.py          # All bpy.props and PropertyGroup definitions
-├── utils.py               # Pure Python helpers
-├── ui.py                  # Panel layout and shared UI helpers
-├── registration.py        # Central register() / unregister()
-├── TAGs_Workflow/
-│   └── tags_workflow.py   # Logic for tagging workflow and related helpers
-├── icons.py               # Icon loading helpers
-├── exporters/
-│   ├── csv_export.py      # CSV export operator & related helpers
-│   └── abc_export.py      # Alembic export operator & face_sets logic
-├── standalone_scripts/
-│   └── ORBXmerger.lua     # Tool for merging ORBX files
-├── Icons/
-│   ├── LMI_Octane_Pointcloud_Bake.svg
-│   └── LMI_Octane_Shot_Manager.svg
+├── __init__.py                             # bl_info + top-level register/unregister
+├── properties.py                           # All bpy.props and PropertyGroup definitions
+├── utils.py                                # Pure Python helpers
+├── ui.py                                   # Panel layout and shared UI helpers
+├── registration.py                         # Central register() / unregister()
+├── Workflows/                              # Contains different workflows logic
+│   └── TAGs/                               # Contains logic and helpers related to tagging workflows
+│       └── tags_workflow.py                # Logic for tagging workflow and related helpers
+├── icons.py                                # Icon loading helpers
+├── exporters/                              # Contains exporters logic
+│   ├── csv_export.py                       # CSV export operator & related helpers
+│   └── abc_export.py                       # Alembic export operator & face_sets logic
+├── standalone_scripts/                     # Contains standalone scripts for specific tasks
+│   └── ORBXmerger.lua                      # Tool for merging ORBX files
+├── Icons/                                  # Contains icons used in the addon
+│   ├── LMI_Octane_Pointcloud_Bake.svg      # Icon for point cloud baking
+│   └── LMI_Octane_Shot_Manager.svg         # Main icon for the addon
