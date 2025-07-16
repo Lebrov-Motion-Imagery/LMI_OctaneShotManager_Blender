@@ -1,4 +1,5 @@
 import os
+import time
 import bpy
 from bpy.types import Operator
 
@@ -44,7 +45,7 @@ class LMB_OT_export_tags_orbx(Operator):
         scene_name = resolve_scene_name()
         shot_name = resolve_shot_name()
 
-        base_root = bpy.path.abspath(props.root_output_dir)
+        base_root = os.path.abspath(bpy.path.abspath(props.root_output_dir))
         prefix = build_scene_shot_prefix(scene_name, shot_name)
         base_dir = os.path.join(base_root, "Shot_Manager", "TAGs", prefix)
         ensure_directory(base_dir)
@@ -111,7 +112,7 @@ class LMB_OT_export_tags_orbx(Operator):
 
                 parts = [prefix, coll.name, f"{r_start}-{r_end}"]
                 filename = generate_export_filename(parts, ORBX_EXTENSION)
-                filepath = os.path.join(base_dir, filename)
+                filepath = os.path.abspath(os.path.join(base_dir, filename))
                 ensure_directory(os.path.dirname(filepath))
 
                 bpy.ops.export.orbx(
@@ -124,6 +125,14 @@ class LMB_OT_export_tags_orbx(Operator):
                     frame_subframe=0.0,
                     filter_glob="*.orbx",
                 )
+
+                # Wait for the ORBX file to appear before continuing
+                for _ in range(50):  # up to ~5s
+                    if os.path.exists(filepath):
+                        break
+                    time.sleep(0.1)
+
+                print(f"ORBX export finished: EXEC_DEFAULT → {filepath}")
 
         # restore states
         for layer, val in original_states.items():
