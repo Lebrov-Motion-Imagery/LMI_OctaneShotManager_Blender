@@ -204,3 +204,37 @@ def chunk_frame_ranges(start, end, size):
         yield (current, chunk_end)
         current += size
 
+
+def wait_for_export(filepath, timeout=300, poll=0.5):
+    """Wait until the ORBX export finishes writing the file."""
+    start_time = time.perf_counter()
+    last_size = -1
+    while time.perf_counter() - start_time < timeout:
+        if os.path.exists(filepath):
+            current_size = os.path.getsize(filepath)
+            if current_size > 0 and current_size == last_size:
+                return True
+            last_size = current_size
+        time.sleep(poll)
+    return False
+
+
+def iterate_collections(root):
+    """Yield collections recursively starting from ``root``."""
+    yield root
+    for child in root.children:
+        yield from iterate_collections(child)
+
+
+def build_parent_map(root):
+    """Return a mapping of child collection -> parent collection."""
+    parent_map = {}
+
+    def _walk(coll):
+        for ch in coll.children:
+            parent_map[ch] = coll
+            _walk(ch)
+
+    _walk(root)
+    return parent_map
+
