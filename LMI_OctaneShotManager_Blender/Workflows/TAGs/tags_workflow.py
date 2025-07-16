@@ -2,7 +2,8 @@ import bpy
 from bpy.types import PropertyGroup, Operator, UIList
 from bpy.props import PointerProperty, BoolProperty
 
-from .utils import find_layer_collection
+from ...utils import find_layer_collection
+from .utils import cycle_tag_collections
 
 
 def _is_parent_of(parent, child):
@@ -140,11 +141,25 @@ class LMB_OT_tag_collection_remove(Operator):
         return {'FINISHED'}
 
 
+class LMB_OT_cycle_tag_collection(Operator):
+    bl_idname = "lmb.cycle_tag_collection"
+    bl_label = "Cycle Tagged Collections"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        coll = cycle_tag_collections(context)
+        if coll is None:
+            self.report({'INFO'}, "No tagged collections found")
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
 classes = (
     TagCollectionItem,
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_remove,
+    LMB_OT_cycle_tag_collection,
 )
 
 
