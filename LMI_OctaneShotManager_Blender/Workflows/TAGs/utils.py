@@ -97,22 +97,28 @@ def parse_orbx_sequence(export_dir, base_name):
     return parts, chunk_sizes
 
 
-def filter_missing_parts(parts, export_dir, base_name, overwrite):
+def filter_missing_parts(parts, export_dir, base_name, overwrite, chunk_size=None):
     """Return subset of parts that need exporting with numbering adjusted."""
-    existing_parts, chunk_sizes = parse_orbx_sequence(export_dir, base_name)
+    existing_parts, _chunk_sizes = parse_orbx_sequence(export_dir, base_name)
 
-    if parts:
+    # Use explicitly requested chunk size if provided, otherwise derive from
+    # the supplied part ranges.
+    if chunk_size:
+        req_chunk = chunk_size
+    elif parts:
         req_chunk = max(to - frm + 1 for _, frm, to in parts)
     else:
         req_chunk = 0
 
+    # Determine the prevalent chunk size among existing parts so we don't rely
+    # on the last (often shorter) chunk in the sequence.
     exist_chunk = None
-    if chunk_sizes:
-        # Choose the most common chunk size (ignoring the last shorter chunk)
-        counts = {c: 0 for c in chunk_sizes}
-        for c in chunk_sizes:
-            counts[c] += 1
-        exist_chunk = max(counts, key=counts.get)
+    if existing_parts:
+        counts = {}
+        for _, start_f, end_f in existing_parts:
+            c = end_f - start_f + 1
+            counts[c] = counts.get(c, 0) + 1
+        exist_chunk = max(sorted(counts.items()), key=lambda kv: kv[1])[0]
 
     if exist_chunk and req_chunk and exist_chunk != req_chunk:
         raise ValueError(

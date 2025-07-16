@@ -63,7 +63,13 @@ class LMB_OT_export_orbx_tags(Operator):
         for coll in collections:
             base_name = f"{prefix}_{coll.name}"
             try:
-                parts = filter_missing_parts(ranges, export_dir, base_name, props.overwrite_orbx)
+                parts = filter_missing_parts(
+                    ranges,
+                    export_dir,
+                    base_name,
+                    props.overwrite_orbx,
+                    chunk_size if use_chunks else None,
+                )
             except ValueError as exc:
                 self.report({'ERROR'}, str(exc))
                 return {'CANCELLED'}
