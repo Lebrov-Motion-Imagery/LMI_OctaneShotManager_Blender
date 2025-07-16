@@ -13,6 +13,39 @@ from ..utils import (
 )
 
 
+def compose_orbx_commands(collection, ranges, prefix, base_dir):
+    """Return a list of parameter dicts for ORBX export commands."""
+    commands = []
+    base_name = f"{prefix}_{collection.name}"
+    for start, end in ranges:
+        filename = generate_export_filename(
+            [base_name, f"{start}-{end}"], ORBX_EXTENSION
+        )
+        filepath = os.path.abspath(os.path.join(base_dir, filename))
+        cmd = {
+            "filepath": filepath,
+            "check_existing": True,
+            "filename": os.path.basename(filepath),
+            "frame_start": start,
+            "frame_end": end,
+            "frame_subframe": 0.0,
+            "filter_glob": "*.orbx",
+        }
+        commands.append(cmd)
+    return commands
+
+
+def execute_orbx_commands(commands):
+    """Execute queued ORBX export commands sequentially."""
+    exported = 0
+    for cmd in commands:
+        print(f"Executing ORBX export → {cmd['filepath']}")
+        result = bpy.ops.export.orbx("EXEC_DEFAULT", **cmd)
+        print(f"ORBX export finished: {result} → {cmd['filepath']}")
+        exported += 1
+    return exported
+
+
 class LMB_OT_export_orbx_tags(Operator):
     """Export each tagged collection as ORBX files."""
     bl_idname = "lmb.export_orbx_tags"
@@ -88,28 +121,24 @@ class LMB_OT_export_orbx_tags(Operator):
             if not target_layer:
                 continue
 
+            # Solo the collection by excluding all layers except the target path
             set_all(True)
             unhide_path(target_layer)
             unhide_children(target_layer)
 
-            base_name = f"{prefix}_{coll.name}"
-            for start, end in ranges:
-                filename = generate_export_filename([base_name, f"{start}-{end}"], ORBX_EXTENSION)
-                filepath = os.path.abspath(os.path.join(base_dir, filename))
+            # Hide objects not belonging to the target collection
+            target_objects = set(coll.all_objects)
+            original_obj_states = {obj: obj.hide_render for obj in bpy.data.objects}
+            for obj in bpy.data.objects:
+                obj.hide_render = obj not in target_objects
 
-                command = (
-                    "bpy.ops.export.orbx('EXEC_DEFAULT', "
-                    f"filepath=r'{filepath}', "
-                    "check_existing=True, "
-                    f"filename='{os.path.basename(filepath)}', "
-                    f"frame_start={start}, "
-                    f"frame_end={end}, "
-                    "frame_subframe=0.0, filter_glob='*.orbx')"
-                )
+            # Compose and execute export commands
+            commands = compose_orbx_commands(coll, ranges, prefix, base_dir)
+            exported += execute_orbx_commands(commands)
 
-                result = eval(command)
-                print(f"Executed: {command}\nORBX export finished: {result} → {filepath}")
-                exported += 1
+            # Restore object states
+            for obj, state in original_obj_states.items():
+                obj.hide_render = state
 
         for lc, val in original_states.items():
             lc.exclude = val
