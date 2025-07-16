@@ -1,4 +1,5 @@
 import os
+import time
 import bpy
 from bpy.types import Operator
 
@@ -18,6 +19,31 @@ class LMB_OT_export_orbx_tags(Operator):
     bl_idname = "lmb.export_orbx_tags"
     bl_label = "Export All TAGs to ORBX"
     bl_options = {'REGISTER', 'UNDO'}
+
+    def _wait_for_export(self, filepath, timeout=300, poll=0.5):
+        """Block until the given file exists or timeout is reached."""
+        start_time = time.time()
+        while not os.path.exists(filepath):
+            if time.time() - start_time > timeout:
+                print(f"Timeout waiting for ORBX export: {filepath}")
+                break
+            time.sleep(poll)
+
+    def _export_orbx(self, filepath, start, end):
+        """Execute the ORBX export and wait for completion."""
+        result = bpy.ops.export.orbx(
+            'EXEC_DEFAULT',
+            filepath=filepath,
+            check_existing=True,
+            filename=os.path.basename(filepath),
+            frame_start=start,
+            frame_end=end,
+            frame_subframe=0.0,
+            filter_glob='*.orbx'
+        )
+        self._wait_for_export(filepath)
+        print(f"ORBX export finished: {result} -> {filepath}")
+        return result
 
     def execute(self, context):
         props = context.scene.otpc_props  # type: OctanePointCloudProperties
@@ -61,10 +87,16 @@ class LMB_OT_export_orbx_tags(Operator):
         all_layers = []
         walk_layers(root_layer, all_layers)
         original_states = {lc: lc.exclude for lc in all_layers}
+        all_objects = list(context.scene.objects)
+        original_obj_states = {obj: (obj.hide_viewport, obj.hide_render) for obj in all_objects}
 
         def set_all(state):
             for lc in all_layers:
                 lc.exclude = state
+        def set_objects(state):
+            for obj in all_objects:
+                obj.hide_viewport = state
+                obj.hide_render = state
 
         def unhide_path(layer_coll):
             if layer_coll is None:
@@ -89,30 +121,27 @@ class LMB_OT_export_orbx_tags(Operator):
                 continue
 
             set_all(True)
+            set_objects(True)
             unhide_path(target_layer)
             unhide_children(target_layer)
+            for obj in coll.all_objects:
+                obj.hide_viewport = False
+                obj.hide_render = False
 
             base_name = f"{prefix}_{coll.name}"
             for start, end in ranges:
                 filename = generate_export_filename([base_name, f"{start}-{end}"], ORBX_EXTENSION)
                 filepath = os.path.abspath(os.path.join(base_dir, filename))
 
-                command = (
-                    "bpy.ops.export.orbx('EXEC_DEFAULT', "
-                    f"filepath=r'{filepath}', "
-                    "check_existing=True, "
-                    f"filename='{os.path.basename(filepath)}', "
-                    f"frame_start={start}, "
-                    f"frame_end={end}, "
-                    "frame_subframe=0.0, filter_glob='*.orbx')"
-                )
-
-                result = eval(command)
-                print(f"Executed: {command}\nORBX export finished: {result} → {filepath}")
+                result = self._export_orbx(filepath, start, end)
+                print(f"Executed ORBX export → {filepath}")
                 exported += 1
 
         for lc, val in original_states.items():
             lc.exclude = val
+        for obj, (hv, hr) in original_obj_states.items():
+            obj.hide_viewport = hv
+            obj.hide_render = hr
 
         self.report({'INFO'}, f"Exported {exported} ORBX files.")
         return {'FINISHED'}
