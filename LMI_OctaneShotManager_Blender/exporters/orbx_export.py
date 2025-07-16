@@ -1,5 +1,6 @@
 import os
 import bpy
+from contextlib import contextmanager
 from bpy.types import Operator
 
 from ..properties import OctanePointCloudProperties
@@ -11,6 +12,21 @@ from ..utils import (
     chunk_frame_ranges,
     ORBX_EXTENSION,
 )
+
+
+@contextmanager
+def solo_collection(collection, all_objects):
+    """Temporarily hide all objects except those in ``collection``."""
+    original = {obj: obj.hide_render for obj in all_objects}
+    try:
+        for obj in all_objects:
+            obj.hide_render = True
+        for obj in collection.all_objects:
+            obj.hide_render = False
+        yield
+    finally:
+        for obj, state in original.items():
+            obj.hide_render = state
 
 
 class LMB_OT_export_orbx_tags(Operator):
@@ -79,7 +95,10 @@ class LMB_OT_export_orbx_tags(Operator):
             for ch in layer_coll.children:
                 unhide_children(ch)
 
-        exported = 0
+        # --------------------------------------------------------------
+        # Compose export commands
+        # --------------------------------------------------------------
+        commands = []
         for item in props.tag_collections:
             coll = item.collection
             if not coll:
@@ -88,27 +107,47 @@ class LMB_OT_export_orbx_tags(Operator):
             if not target_layer:
                 continue
 
-            set_all(True)
-            unhide_path(target_layer)
-            unhide_children(target_layer)
-
             base_name = f"{prefix}_{coll.name}"
             for start, end in ranges:
                 filename = generate_export_filename([base_name, f"{start}-{end}"], ORBX_EXTENSION)
                 filepath = os.path.abspath(os.path.join(base_dir, filename))
+                commands.append({
+                    "collection": coll,
+                    "target_layer": target_layer,
+                    "filepath": filepath,
+                    "start": start,
+                    "end": end,
+                })
 
-                command = (
-                    "bpy.ops.export.orbx('EXEC_DEFAULT', "
-                    f"filepath=r'{filepath}', "
-                    "check_existing=True, "
-                    f"filename='{os.path.basename(filepath)}', "
-                    f"frame_start={start}, "
-                    f"frame_end={end}, "
-                    "frame_subframe=0.0, filter_glob='*.orbx')"
+        # --------------------------------------------------------------
+        # Execute export commands sequentially
+        # --------------------------------------------------------------
+        all_objects = list(context.scene.objects)
+        exported = 0
+
+        for cmd in commands:
+            coll = cmd["collection"]
+            target_layer = cmd["target_layer"]
+
+            set_all(True)
+            unhide_path(target_layer)
+            unhide_children(target_layer)
+
+            with solo_collection(coll, all_objects):
+                result = bpy.ops.export.orbx(
+                    'EXEC_DEFAULT',
+                    filepath=cmd["filepath"],
+                    check_existing=True,
+                    filename=os.path.basename(cmd["filepath"]),
+                    frame_start=cmd["start"],
+                    frame_end=cmd["end"],
+                    frame_subframe=0.0,
+                    filter_glob='*.orbx'
                 )
-
-                result = eval(command)
-                print(f"Executed: {command}\nORBX export finished: {result} → {filepath}")
+                print(
+                    f"Executed: {cmd['filepath']} frames {cmd['start']}-{cmd['end']} "
+                    f"→ result {result}"
+                )
                 exported += 1
 
         for lc, val in original_states.items():
