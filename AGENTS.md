@@ -16,5 +16,5 @@ This repository contains a Blender add-on. Please adhere to the following guidel
 
 
 ## Project Overview
-- The `Structure` file in the repository root provides a high-level overview of the directories contained in this project.
-
+- The `Structure` file in the repository root provides a high-level overview of the directories contained in this project. Use it to navigate through files and update it whenever anything was moved or created.
+- Files *_Example.py is temporary but working and tested scripts. You can rely on its the logic, related necessary functions and modules to create a new parts of code.
