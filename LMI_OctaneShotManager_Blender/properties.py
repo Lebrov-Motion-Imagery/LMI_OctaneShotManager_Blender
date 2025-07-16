@@ -8,7 +8,7 @@ from bpy.props import (
     IntProperty,
 )
 
-from .TAGs_Workflow.tags_workflow import TagCollectionItem
+from .Workflows.TAGs.tags_workflow import TagCollectionItem
 
 
 class OctanePointCloudProperties(bpy.types.PropertyGroup):
@@ -148,6 +148,7 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
 
     tag_collections: CollectionProperty(type=TagCollectionItem)
     tag_collections_index: IntProperty(default=-1)
+    tag_cycle_index: IntProperty(default=-1, options={'HIDDEN'})
 
     # TAGs frame range and chunk settings
     tag_frame_start: IntProperty(
