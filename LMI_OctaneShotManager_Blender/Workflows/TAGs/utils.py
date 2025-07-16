@@ -99,6 +99,19 @@ def parse_orbx_sequence(export_dir, base_name):
 
 def filter_missing_parts(parts, export_dir, base_name, overwrite, chunk_size=None):
     """Return subset of parts that need exporting with numbering adjusted."""
+    # When chunk_size is ``None`` we skip all chunk detection logic and simply
+    # check whether the resulting files exist. This mode is used when the user
+    # disables chunking entirely.
+    if chunk_size is None:
+        results = []
+        for part_no, frm, to in parts:
+            filename = f"{base_name}_pt{part_no}_{frm:03d}-{to:03d}.orbx"
+            filepath = os.path.join(export_dir, filename)
+            if os.path.exists(filepath) and not overwrite:
+                continue
+            results.append((part_no, frm, to))
+        return results
+
     existing_parts, _chunk_sizes = parse_orbx_sequence(export_dir, base_name)
 
     # Use explicitly requested chunk size if provided, otherwise derive from
