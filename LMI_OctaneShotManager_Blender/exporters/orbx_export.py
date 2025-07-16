@@ -13,6 +13,29 @@ from ..utils import (
 )
 
 
+def _build_orbx_command(filepath: str, start: int, end: int) -> str:
+    """Return a string command for the Octane ORBX exporter."""
+    return (
+        "bpy.ops.export.orbx('EXEC_DEFAULT', "
+        f"filepath=r'{filepath}', "
+        "check_existing=True, "
+        f"filename='{os.path.basename(filepath)}', "
+        f"frame_start={start}, "
+        f"frame_end={end}, "
+        "frame_subframe=0.0, filter_glob='*.orbx')"
+    )
+
+
+def _execute_commands(commands):
+    """Execute a list of (command, filepath) tuples sequentially."""
+    exported = 0
+    for command, filepath in commands:
+        result = eval(command)
+        print(f"Executed: {command}\nORBX export finished: {result} → {filepath}")
+        exported += 1
+    return exported
+
+
 class LMB_OT_export_orbx_tags(Operator):
     """Export each tagged collection as ORBX files."""
     bl_idname = "lmb.export_orbx_tags"
@@ -60,26 +83,29 @@ class LMB_OT_export_orbx_tags(Operator):
 
         all_layers = []
         walk_layers(root_layer, all_layers)
-        original_states = {lc: lc.exclude for lc in all_layers}
+        original_states = {lc: (lc.exclude, lc.collection.hide_render) for lc in all_layers}
 
         def set_all(state):
             for lc in all_layers:
                 lc.exclude = state
+                lc.collection.hide_render = state
 
         def unhide_path(layer_coll):
             if layer_coll is None:
                 return
             layer_coll.exclude = False
+            layer_coll.collection.hide_render = False
             parent = getattr(layer_coll, "parent", None)
             if parent:
                 unhide_path(parent)
 
         def unhide_children(layer_coll):
             layer_coll.exclude = False
+            layer_coll.collection.hide_render = False
             for ch in layer_coll.children:
                 unhide_children(ch)
 
-        exported = 0
+        commands = []
         for item in props.tag_collections:
             coll = item.collection
             if not coll:
@@ -97,22 +123,15 @@ class LMB_OT_export_orbx_tags(Operator):
                 filename = generate_export_filename([base_name, f"{start}-{end}"], ORBX_EXTENSION)
                 filepath = os.path.abspath(os.path.join(base_dir, filename))
 
-                command = (
-                    "bpy.ops.export.orbx('EXEC_DEFAULT', "
-                    f"filepath=r'{filepath}', "
-                    "check_existing=True, "
-                    f"filename='{os.path.basename(filepath)}', "
-                    f"frame_start={start}, "
-                    f"frame_end={end}, "
-                    "frame_subframe=0.0, filter_glob='*.orbx')"
-                )
+                command = _build_orbx_command(filepath, start, end)
+                commands.append((command, filepath))
 
-                result = eval(command)
-                print(f"Executed: {command}\nORBX export finished: {result} → {filepath}")
-                exported += 1
+        exported = _execute_commands(commands)
 
-        for lc, val in original_states.items():
-            lc.exclude = val
+        for lc, states in original_states.items():
+            excl, hide = states
+            lc.exclude = excl
+            lc.collection.hide_render = hide
 
         self.report({'INFO'}, f"Exported {exported} ORBX files.")
         return {'FINISHED'}
