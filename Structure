@@ -1,11 +1,16 @@
-LMI_Pointcloud_Baker/
+LMI_OctaneShotManager_Blender/
 ├── __init__.py            # bl_info + top-level register/unregister
 ├── properties.py          # All bpy.props and PropertyGroup definitions
-├── utils.py               # Pure Python helpers (matrix build, filename, CSV writer)
+├── utils.py               # Pure Python helpers
 ├── ui.py                  # Panel layout and shared UI helpers
-|── registration.py        # Central register() / unregister()
+├── registration.py        # Central register() / unregister()
+├── tags_workflow.py       # Logic for tagging workflow
+├── icons.py               # Icon loading helpers
 ├── exporters/
 │   ├── csv_export.py      # CSV export operator & related helpers
 │   └── abc_export.py      # Alembic export operator & face_sets logic
-├── icons/
-|    └──LMI_SOP_Octane_Pointcloud_Bake.svg
+├── standalone_scripts/
+│   └── ORBXmerger.lua     # Tool for merging ORBX files
+├── Icons/
+│   ├── LMI_Octane_Pointcloud_Bake.svg
+│   └── LMI_Octane_Shot_Manager.svg
