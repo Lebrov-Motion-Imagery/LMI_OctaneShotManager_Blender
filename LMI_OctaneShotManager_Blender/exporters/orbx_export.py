@@ -8,15 +8,14 @@ from ..utils import (
     generate_export_filename,
     build_scene_shot_prefix,
     ORBX_EXTENSION,
-    iter_chunk_ranges,
+    chunk_frame_ranges,
     find_layer_collection,
-    wait_for_file,
 )
 
 
-class LMB_OT_export_tags_orbx(Operator):
+class LMB_OT_export_orbx_tags(Operator):
     """Export each tagged collection to ORBX files."""
-    bl_idname = "lmb.export_tags_orbx"
+    bl_idname = "lmb.export_orbx_tags"
     bl_label = "Export All TAGs to ORBX"
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -52,7 +51,7 @@ class LMB_OT_export_tags_orbx(Operator):
 
         frame_start = props.tag_frame_start
         frame_end = props.tag_frame_end
-        ranges = list(iter_chunk_ranges(frame_start, frame_end, props.tag_chunk_size)) if props.tag_use_chunks else [(frame_start, frame_end)]
+        ranges = chunk_frame_ranges(frame_start, frame_end, props.tag_chunk_size) if props.tag_use_chunks else [(frame_start, frame_end)]
 
         # store original exclude states
         root_layer = context.view_layer.layer_collection
@@ -126,12 +125,7 @@ class LMB_OT_export_tags_orbx(Operator):
                     filter_glob="*.orbx",
                 )
 
-                wait_for_file(filepath)
-
-                if os.path.exists(filepath):
-                    print(f"ORBX export finished: {result} → {filepath}")
-                else:
-                    print(f"ORBX export failed to create: {filepath}")
+                print(f"ORBX export finished: {result} → {filepath}")
 
         # restore states
         for layer, val in original_states.items():
@@ -142,7 +136,7 @@ class LMB_OT_export_tags_orbx(Operator):
 
 
 classes = (
-    LMB_OT_export_tags_orbx,
+    LMB_OT_export_orbx_tags,
 )
 
 

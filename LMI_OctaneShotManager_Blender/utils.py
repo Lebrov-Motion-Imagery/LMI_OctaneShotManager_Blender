@@ -193,21 +193,13 @@ def parse_frame_range(frame_range_str):
     return sorted(frames)
 
 
-def iter_chunk_ranges(start, end, size):
-    """Yield inclusive frame range tuples split by ``size``."""
+def chunk_frame_ranges(start, end, size):
+    """Return a list of inclusive frame range tuples split by ``size``."""
+    ranges = []
     size = max(1, int(size))
     for s in range(int(start), int(end) + 1, size):
         e = min(s + size - 1, int(end))
-        yield s, e
-
-
-def wait_for_file(path, timeout=30.0, step=0.1):
-    """Return True when ``path`` exists or ``timeout`` seconds elapse."""
-    start = time.perf_counter()
-    while (time.perf_counter() - start) < timeout:
-        if os.path.exists(path):
-            return True
-        time.sleep(step)
-    return os.path.exists(path)
+        ranges.append((s, e))
+    return ranges
 
 
