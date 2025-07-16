@@ -1,5 +1,4 @@
 import os
-import time
 import bpy
 from bpy.types import Operator
 
@@ -126,13 +125,10 @@ class LMB_OT_export_tags_orbx(Operator):
                     filter_glob="*.orbx",
                 )
 
-                # Wait for the ORBX file to appear before continuing
-                for _ in range(50):  # up to ~5s
-                    if os.path.exists(filepath):
-                        break
-                    time.sleep(0.1)
-
-                print(f"ORBX export finished: EXEC_DEFAULT → {filepath}")
+                if os.path.exists(filepath):
+                    print(f"ORBX export finished: EXEC_DEFAULT → {filepath}")
+                else:
+                    print(f"ORBX export failed to create: {filepath}")
 
         # restore states
         for layer, val in original_states.items():
