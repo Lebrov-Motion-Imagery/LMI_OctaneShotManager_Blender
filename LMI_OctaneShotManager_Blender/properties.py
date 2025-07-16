@@ -8,7 +8,7 @@ from bpy.props import (
     IntProperty,
 )
 
-from .tags_workflow import TagCollectionItem
+from .TAGs_Workflow.tags_workflow import TagCollectionItem
 
 
 class OctanePointCloudProperties(bpy.types.PropertyGroup):
