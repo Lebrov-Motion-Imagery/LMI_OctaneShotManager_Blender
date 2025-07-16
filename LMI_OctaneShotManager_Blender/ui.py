@@ -64,6 +64,7 @@ class POINTCLOUD_PT_panel(Panel):
             col = row.column(align=True)
             col.operator('lmb.tag_collection_add', icon='ADD', text='')
             col.operator('lmb.tag_collection_remove', icon='REMOVE', text='')
+            tag_box.operator('lmb.cycle_tag_collections', text='Cycle Collections (TEST)', icon='FILE_REFRESH')
 
             tag_box.label(text="Frame Range and Chunk:")
             row = tag_box.row(align=True)

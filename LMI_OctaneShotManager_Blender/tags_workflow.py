@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import PropertyGroup, Operator, UIList
-from bpy.props import PointerProperty, BoolProperty
+from bpy.props import PointerProperty, BoolProperty, IntProperty
 
 from .utils import find_layer_collection
 
@@ -15,6 +15,42 @@ def _is_parent_of(parent, child):
 def has_hierarchy_relation(col_a, col_b):
     """Return True if collections have a parent-child relationship."""
     return _is_parent_of(col_a, col_b) or _is_parent_of(col_b, col_a)
+
+
+def solo_tag_collection(context, collection):
+    """Solo the given collection by excluding all others in the view layer."""
+    layer = find_layer_collection(context.view_layer.layer_collection, collection)
+    if layer is None:
+        return False
+
+    def toggle_layer(layer_coll, state):
+        for lc in layer_coll.children:
+            toggle_layer(lc, state)
+            lc.exclude = state
+
+    toggle_layer(context.view_layer.layer_collection, True)
+    layer.exclude = False
+    return True
+
+
+def cycle_tag_collections(context, step=1):
+    """Cycle through tagged collections and solo each one in turn."""
+    props = context.scene.otpc_props
+    if not props.tag_collections:
+        return None
+
+    start_idx = props.tag_collections_index
+    num = len(props.tag_collections)
+    idx = start_idx
+
+    for _ in range(num):
+        idx = (idx + step) % num
+        item = props.tag_collections[idx]
+        coll = item.collection
+        if coll and solo_tag_collection(context, coll):
+            props.tag_collections_index = idx
+            return coll
+    return None
 
 class TagCollectionItem(PropertyGroup):
     collection: PointerProperty(
@@ -140,11 +176,29 @@ class LMB_OT_tag_collection_remove(Operator):
         return {'FINISHED'}
 
 
+class LMB_OT_cycle_tag_collections(Operator):
+    bl_idname = "lmb.cycle_tag_collections"
+    bl_label = "Cycle TAG Collections"
+    bl_description = "TEMP: Cycle through tagged collections and solo them"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    step: IntProperty(default=1, options={'HIDDEN'})
+
+    def execute(self, context):
+        coll = cycle_tag_collections(context, self.step)
+        if coll:
+            self.report({'INFO'}, f"Soloed {coll.name}")
+        else:
+            self.report({'WARNING'}, "No collection soloed")
+        return {'FINISHED'}
+
+
 classes = (
     TagCollectionItem,
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_remove,
+    LMB_OT_cycle_tag_collections,
 )
 
 
