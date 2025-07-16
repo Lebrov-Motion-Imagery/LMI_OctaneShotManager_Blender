@@ -1,4 +1,5 @@
 import os
+import time
 import bpy
 from bpy.types import Operator
 
@@ -114,7 +115,7 @@ class LMB_OT_export_tags_orbx(Operator):
                 filepath = os.path.abspath(os.path.join(base_dir, filename))
                 ensure_directory(os.path.dirname(filepath))
 
-                bpy.ops.export.orbx(
+                result = bpy.ops.export.orbx(
                     'EXEC_DEFAULT',
                     filepath=filepath,
                     check_existing=True,
@@ -125,8 +126,13 @@ class LMB_OT_export_tags_orbx(Operator):
                     filter_glob="*.orbx",
                 )
 
+                for _ in range(300):  # wait up to ~30s
+                    if os.path.exists(filepath):
+                        break
+                    time.sleep(0.1)
+
                 if os.path.exists(filepath):
-                    print(f"ORBX export finished: EXEC_DEFAULT → {filepath}")
+                    print(f"ORBX export finished: {result} → {filepath}")
                 else:
                     print(f"ORBX export failed to create: {filepath}")
 
