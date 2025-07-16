@@ -201,3 +201,13 @@ def iter_chunk_ranges(start, end, size):
         yield s, e
 
 
+def wait_for_file(path, timeout=30.0, step=0.1):
+    """Return True when ``path`` exists or ``timeout`` seconds elapse."""
+    start = time.perf_counter()
+    while (time.perf_counter() - start) < timeout:
+        if os.path.exists(path):
+            return True
+        time.sleep(step)
+    return os.path.exists(path)
+
+

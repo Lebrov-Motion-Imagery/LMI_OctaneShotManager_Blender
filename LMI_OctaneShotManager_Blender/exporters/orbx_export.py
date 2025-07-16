@@ -1,5 +1,4 @@
 import os
-import time
 import bpy
 from bpy.types import Operator
 
@@ -11,6 +10,7 @@ from ..utils import (
     ORBX_EXTENSION,
     iter_chunk_ranges,
     find_layer_collection,
+    wait_for_file,
 )
 
 
@@ -126,10 +126,7 @@ class LMB_OT_export_tags_orbx(Operator):
                     filter_glob="*.orbx",
                 )
 
-                for _ in range(300):  # wait up to ~30s
-                    if os.path.exists(filepath):
-                        break
-                    time.sleep(0.1)
+                wait_for_file(filepath)
 
                 if os.path.exists(filepath):
                     print(f"ORBX export finished: {result} → {filepath}")
