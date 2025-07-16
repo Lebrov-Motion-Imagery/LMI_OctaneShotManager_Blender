@@ -172,3 +172,9 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         default=25,
         min=1,
     )
+
+    overwrite_orbx: BoolProperty(
+        name="Overwrite ORBX",
+        description="Allow overwriting existing ORBX files",
+        default=False,
+    )
