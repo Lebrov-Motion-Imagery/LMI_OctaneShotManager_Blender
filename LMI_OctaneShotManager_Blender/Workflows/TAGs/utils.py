@@ -279,7 +279,7 @@ def make_orbx_export_manager(task_queue, export_dir, prefix, overwrite, poll_int
     return manager
 
 
-def make_all_in_one_orbx_export_manager(task_queue, export_dir, base_name, overwrite, poll_interval=3.0):
+def make_direct_merged_orbx_export_manager(task_queue, export_dir, base_name, overwrite, poll_interval=3.0):
     """Create a timer callback to export ORBX chunks without soloing."""
     state = {'waiting_for': None}
 
