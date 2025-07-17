@@ -135,7 +135,7 @@ def filter_missing_parts(parts, export_dir, base_name, overwrite, chunk_size=Non
     if chunk_size is None:
         results = []
         for part_no, frm, to in parts:
-            filename = f"{base_name}_pt{part_no}_{frm:03d}-{to:03d}.orbx"
+            filename = f"{base_name}_{frm:03d}-{to:03d}.orbx"
             filepath = os.path.join(export_dir, filename)
             if os.path.exists(filepath) and not overwrite:
                 continue
