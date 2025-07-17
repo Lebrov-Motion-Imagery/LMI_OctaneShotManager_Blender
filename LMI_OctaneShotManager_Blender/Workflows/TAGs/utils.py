@@ -2,7 +2,7 @@ import bpy
 import os
 import re
 import subprocess
-from ...utils import find_layer_collection
+from ...utils import find_layer_collection, log
 
 
 def get_tagged_collections(scene):
@@ -284,24 +284,24 @@ def make_orbx_export_manager(task_queue, export_dir, prefix, overwrite, poll_int
                 filename = f"{base_name}_pt{part_no}_{frm:03d}-{to:03d}.orbx"
                 filepath = os.path.join(export_dir, filename)
                 if os.path.exists(filepath) and not overwrite:
-                    print(f"Skipping existing {filename}")
+                    log(f"Skipping existing {filename}")
                     continue
                 fp = export_orbx_chunk(part_no, frm, to, export_dir, base_name)
                 state['waiting_for'] = fp
                 state['current_fp'] = fp
                 return poll_interval
 
-            print("✅ All exports done.")
+            log("✅ All exports done.")
             return None
         else:
             fp = state['waiting_for']
             name = os.path.basename(fp)
             if is_file_created(fp):
-                print(f"✔ Done {name}")
+                log(f"✔ Done {name}")
                 state['waiting_for'] = None
                 state['current_fp'] = None
             else:
-                print(f"…waiting for {name}")
+                log(f"…waiting for {name}")
             return poll_interval
 
     return manager
@@ -318,22 +318,22 @@ def make_direct_merged_orbx_export_manager(task_queue, export_dir, base_name, ov
                 filename = f"{base_name}_pt{part_no}_{frm:03d}-{to:03d}.orbx"
                 filepath = os.path.join(export_dir, filename)
                 if os.path.exists(filepath) and not overwrite:
-                    print(f"Skipping existing {filename}")
+                    log(f"Skipping existing {filename}")
                     continue
                 fp = export_orbx_chunk(part_no, frm, to, export_dir, base_name)
                 state['waiting_for'] = fp
                 return poll_interval
 
-            print("✅ All exports done.")
+            log("✅ All exports done.")
             return None
         else:
             fp = state['waiting_for']
             name = os.path.basename(fp)
             if is_file_created(fp):
-                print(f"✔ Done {name}")
+                log(f"✔ Done {name}")
                 state['waiting_for'] = None
             else:
-                print(f"…waiting for {name}")
+                log(f"…waiting for {name}")
             return poll_interval
 
     return manager
@@ -373,19 +373,19 @@ def make_orbx_merge_manager(
                 state['cmd'] = cmd
                 return poll_interval
 
-            print("✅ All merges done.")
+            log("✅ All merges done.")
             return None
         else:
             if state['proc'].poll() is None:
                 name = os.path.basename(state['waiting_for'])
-                print(f"…waiting for {name}")
+                log(f"…waiting for {name}")
                 return poll_interval
 
             name = os.path.basename(state['waiting_for'])
             if is_file_created(state['waiting_for']):
-                print(f"✔ Done {name}")
+                log(f"✔ Done {name}")
             else:
-                print(f"❌ Failed {name}")
+                log(f"❌ Failed {name}")
             state['proc'] = None
             state['waiting_for'] = None
             state['cmd'] = None

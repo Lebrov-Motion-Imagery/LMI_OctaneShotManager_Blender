@@ -11,9 +11,16 @@ import csv
 CSV_EXTENSION = 'csv'
 ABC_EXTENSION = 'abc'
 
+
+def log(message):
+    """Print messages with a unified prefix."""
+    print(f"[ShotManager] {message}")
+
 # -----------------------------------------------------------------------------
 # Directory Helpers
 # -----------------------------------------------------------------------------
+
+
 def ensure_directory(path):
     """
     Create the directory if it doesn't exist.
@@ -38,6 +45,8 @@ def find_layer_collection(layer_collection, collection):
 # -----------------------------------------------------------------------------
 # Executable Helpers
 # -----------------------------------------------------------------------------
+
+
 def resolve_octane_executable(path):
     """Return an absolute path to the Octane executable if valid."""
     import bpy
@@ -63,6 +72,8 @@ def resolve_octane_executable(path):
 # -----------------------------------------------------------------------------
 # Filename Generators
 # -----------------------------------------------------------------------------
+
+
 def generate_export_filename(parts, ext):
     """
     Join non-empty tokens with underscores and append an extension.
@@ -77,6 +88,8 @@ def generate_export_filename(parts, ext):
 # -----------------------------------------------------------------------------
 # Prefix Helpers
 # -----------------------------------------------------------------------------
+
+
 def sanitize_token(token):
     """Replace spaces with underscores to keep paths clean."""
     return str(token).replace(' ', '_') if token else ''
@@ -96,6 +109,8 @@ def build_scene_shot_prefix(scene_name, shot_name):
 # -----------------------------------------------------------------------------
 # Matrix Builders
 # -----------------------------------------------------------------------------
+
+
 def build_asset_world_matrices():
     """
     Return two correction matrices:
@@ -108,6 +123,7 @@ def build_asset_world_matrices():
     world_mat = Matrix.Rotation(math.radians(-90.0), 4, 'X')
     return asset_mat, world_mat
 
+
 def flatten_matrices_to_list(matrix_list):
     """
     Convert a list of 4x4 matrices to a list of flat row-major lists (3x4 only).
@@ -119,11 +135,12 @@ def flatten_matrices_to_list(matrix_list):
     for m in matrix_list:
         # Extract 3 rows and 4 columns
         flat.append([m[i][j] for i in range(3) for j in range(4)])
-    return flat
+
 
 # -----------------------------------------------------------------------------
 # Timing Decorator
 # -----------------------------------------------------------------------------
+
 def timed(func):
     """
     Decorator to measure and report execution time of functions.
@@ -138,13 +155,15 @@ def timed(func):
         start = time.perf_counter()
         result = func(*args, **kwargs)
         elapsed = time.perf_counter() - start
-        print(f"[TIMED] {func.__name__} took {elapsed:.4f}s")
+        log(f"[TIMED] {func.__name__} took {elapsed:.4f}s")
         return result
     return wrapper
+
 
 # -----------------------------------------------------------------------------
 # CSV Writer Utility
 # -----------------------------------------------------------------------------
+
 def write_csv_groups(groups, base_dir, subfolder, overwrite, frame_suffix=None, pc_suffix=False, prefix_parts=None):
     """
     Write instance transform groups to CSV files.
@@ -182,9 +201,11 @@ def write_csv_groups(groups, base_dir, subfolder, overwrite, frame_suffix=None, 
             for idx, row in enumerate(rows):
                 writer.writerow(row + [idx])
 
+
 # -----------------------------------------------------------------------------
 # Frame Range Parser
 # -----------------------------------------------------------------------------
+
 def parse_frame_range(frame_range_str):
     """
     Parse a string of frames/ranges into a sorted list of unique frame ints.
@@ -215,4 +236,3 @@ def parse_frame_range(frame_range_str):
             except ValueError:
                 continue
     return sorted(frames)
-

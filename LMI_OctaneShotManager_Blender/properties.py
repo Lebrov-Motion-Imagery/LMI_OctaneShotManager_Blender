@@ -39,7 +39,7 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
             ('COLLECTION', "Collection", "Export all objects in a collection"),
         ],
         default='OBJECT',
-    ) # type: ignore
+    )  # type: ignore
     csv_object_source: PointerProperty(
         name="CSV Object",
         description="Instancer object for CSV export",

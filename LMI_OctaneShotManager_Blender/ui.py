@@ -2,6 +2,7 @@ import bpy
 from .icons import icon_collections
 from bpy.types import Panel
 
+
 class POINTCLOUD_PT_panel(Panel):
     bl_label = "LMI Octane Shot Manager"
     bl_idname = "POINTCLOUD_PT_panel"
@@ -84,7 +85,7 @@ class POINTCLOUD_PT_panel(Panel):
             merge_box.operator('lmb.merge_selected_tags', text='Merge selected Tags', icon='EXPORT')
             merge_box.operator('lmb.merge_all_tags', text='Merge all Tags', icon='EXPORT')
             layout.separator()
-            
+
         # PointCloud Baker dropdown
         row = layout.row()
         arrow = 'TRIA_DOWN' if p.show_pointcloud_baker else 'TRIA_RIGHT'
@@ -120,4 +121,3 @@ class POINTCLOUD_PT_panel(Panel):
                     box.prop(p, 'abc_collection_source')
                 box.prop(p, 'overwrite_abc')
                 box.operator('lmb.export_abc', text="Export Alembic", icon='EXPORT')
-

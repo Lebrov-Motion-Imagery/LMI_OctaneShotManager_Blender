@@ -1,3 +1,5 @@
+from . import registration
+
 bl_info = {
     "name": "LMI_OctaneShotManager_Blender",
     "author": "Arseniy Kolenchenko (Lebrov Motion Imagery) & Render Foundation.",
@@ -13,8 +15,6 @@ bl_info = {
     ),
     "category": "Import-Export",
 }
-
-from . import registration
 
 
 def register():

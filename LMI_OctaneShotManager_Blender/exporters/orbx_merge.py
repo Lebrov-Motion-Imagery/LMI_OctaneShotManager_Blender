@@ -86,12 +86,12 @@ class LMB_OT_merge_selected_tags(Operator):
 
         octane_exec = resolve_octane_executable(props.octane_standalone_path)
         if not octane_exec:
-            self.report({'ERROR'}, 'Invalid Octane Standalone path')
+            self.report({'ERROR'}, '[ShotManager] Invalid Octane Standalone path')
             return {'CANCELLED'}
 
         collections = get_selected_tagged_collections(scene)
         if not collections:
-            self.report({'ERROR'}, 'No selected tagged collections.')
+            self.report({'ERROR'}, '[ShotManager] No selected tagged collections.')
             return {'CANCELLED'}
 
         scene_name = _resolve_scene_name(props, scene)
@@ -122,7 +122,7 @@ class LMB_OT_merge_selected_tags(Operator):
             expected,
         )
         if err:
-            self.report({'ERROR'}, err)
+            self.report({'ERROR'}, f"[ShotManager] {err}")
             return {'CANCELLED'}
 
         base_name = f"{prefix}_Merged_{'_'.join(c.name for c in collections)}"
@@ -147,7 +147,7 @@ class LMB_OT_merge_selected_tags(Operator):
         )
         bpy.app.timers.register(manager, first_interval=0.0)
 
-        self.report({'INFO'}, 'ORBX merging started.')
+        self.report({'INFO'}, '[ShotManager] ORBX merging started.')
         return {'FINISHED'}
 
 
@@ -163,12 +163,12 @@ class LMB_OT_merge_all_tags(Operator):
 
         octane_exec = resolve_octane_executable(props.octane_standalone_path)
         if not octane_exec:
-            self.report({'ERROR'}, 'Invalid Octane Standalone path')
+            self.report({'ERROR'}, '[ShotManager] Invalid Octane Standalone path')
             return {'CANCELLED'}
 
         collections = get_tagged_collections(scene)
         if not collections:
-            self.report({'ERROR'}, 'No tagged collections defined.')
+            self.report({'ERROR'}, '[ShotManager] No tagged collections defined.')
             return {'CANCELLED'}
 
         scene_name = _resolve_scene_name(props, scene)
@@ -199,7 +199,7 @@ class LMB_OT_merge_all_tags(Operator):
             expected,
         )
         if err:
-            self.report({'ERROR'}, err)
+            self.report({'ERROR'}, f"[ShotManager] {err}")
             return {'CANCELLED'}
 
         base_name = f"{prefix}_Merged"
@@ -226,7 +226,7 @@ class LMB_OT_merge_all_tags(Operator):
         )
         bpy.app.timers.register(manager, first_interval=0.0)
 
-        self.report({'INFO'}, 'ORBX merging started.')
+        self.report({'INFO'}, '[ShotManager] ORBX merging started.')
         return {'FINISHED'}
 
 

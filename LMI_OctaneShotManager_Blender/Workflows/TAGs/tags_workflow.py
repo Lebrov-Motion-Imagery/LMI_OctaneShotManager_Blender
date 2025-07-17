@@ -18,6 +18,7 @@ def has_hierarchy_relation(col_a, col_b):
     """Return True if collections have a parent-child relationship."""
     return _is_parent_of(col_a, col_b) or _is_parent_of(col_b, col_a)
 
+
 class TagCollectionItem(PropertyGroup):
     collection: PointerProperty(
         name="Collection",
@@ -107,7 +108,7 @@ class LMB_OT_tag_collection_add(Operator):
 
         if not selected_cols:
             self.report({'INFO'},
-                        "There are no collections selected, nothing to add.")
+                        "[ShotManager] There are no collections selected, nothing to add.")
             return {'CANCELLED'}
 
         existing = [item.collection for item in props.tag_collections]
@@ -118,7 +119,7 @@ class LMB_OT_tag_collection_add(Operator):
             for other in existing + to_add:
                 if has_hierarchy_relation(coll, other):
                     self.report({'INFO'},
-                                "Child or parent collections can not be tagged. Only the same level of collection hierarchy is allowed to TAG")
+                                "[ShotManager] Child or parent collections can not be tagged. Only the same level of collection hierarchy is allowed to TAG")
                     return {'CANCELLED'}
             to_add.append(coll)
 
@@ -154,7 +155,7 @@ class LMB_OT_cycle_tag_collection(Operator):
     def execute(self, context):
         coll = cycle_tag_collections(context)
         if coll is None:
-            self.report({'INFO'}, "No tagged collections found")
+            self.report({'INFO'}, "[ShotManager] No tagged collections found")
             return {'CANCELLED'}
         return {'FINISHED'}
 
