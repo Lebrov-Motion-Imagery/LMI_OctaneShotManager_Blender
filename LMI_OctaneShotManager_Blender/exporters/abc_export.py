@@ -2,20 +2,24 @@ import os
 import bpy
 from bpy.types import Operator
 
-from ..properties import OctanePointCloudProperties
+from typing import TYPE_CHECKING
+
 from ..utils import (
     ensure_directory,
     generate_export_filename,
-    build_asset_world_matrices,
     build_scene_shot_prefix,
     ABC_EXTENSION,
 )
+
+if TYPE_CHECKING:  # pragma: no cover - for type hints only
+    from ..properties import OctanePointCloudProperties  # noqa: F401
 
 
 class LMB_OT_export_abc(Operator):
     """Export selected objects or collections as Alembic files with face sets."""
     bl_idname = "lmb.export_abc"
     bl_label = "Export Alembic Instances"
+    bl_description = "Export instancer sources to Alembic"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -44,7 +48,7 @@ class LMB_OT_export_abc(Operator):
             root_folder = f"{props.abc_collection_source.name}_ABCs"
 
         if not sources:
-            self.report({'ERROR'}, "No Alembic sources defined.")
+            self.report({'ERROR'}, "[ShotManager] No Alembic sources defined.")
             return {'CANCELLED'}
 
         scene_name = resolve_scene_name()
@@ -86,9 +90,9 @@ class LMB_OT_export_abc(Operator):
 
             # Restore location
             obj.location = orig_loc
-            self.report({'INFO'}, f"Exported Alembic: {filename}")
+            self.report({'INFO'}, f"[ShotManager] Exported Alembic: {filename}")
 
-        self.report({'INFO'}, "Alembic export completed.")
+        self.report({'INFO'}, "[ShotManager] Alembic export completed.")
         return {'FINISHED'}
 
 

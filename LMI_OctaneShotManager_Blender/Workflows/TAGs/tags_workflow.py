@@ -2,10 +2,12 @@ import bpy
 from bpy.types import PropertyGroup, Operator, UIList
 from bpy.props import PointerProperty, BoolProperty
 
-from .utils import find_layer_collection
+from ...utils import find_layer_collection
+from .utils import cycle_tag_collections
 
 
 def _is_parent_of(parent, child):
+    """Return True if ``parent`` collection contains ``child`` in its hierarchy."""
     for sub in parent.children:
         if sub == child or _is_parent_of(sub, child):
             return True
@@ -16,6 +18,7 @@ def has_hierarchy_relation(col_a, col_b):
     """Return True if collections have a parent-child relationship."""
     return _is_parent_of(col_a, col_b) or _is_parent_of(col_b, col_a)
 
+
 class TagCollectionItem(PropertyGroup):
     collection: PointerProperty(
         name="Collection",
@@ -23,6 +26,7 @@ class TagCollectionItem(PropertyGroup):
     )
 
     def update_exclude(self, context):
+        """Update view layer exclusion state when the Solo toggle changes."""
         props = context.scene.otpc_props
 
         def toggle_layer(layer_coll, state):
@@ -74,6 +78,7 @@ class LMB_UL_tag_collections(UIList):
 class LMB_OT_tag_collection_add(Operator):
     bl_idname = "lmb.tag_collection_add"
     bl_label = "Add Collection to TAG"
+    bl_description = "Add selected collections to the TAG list"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -103,7 +108,7 @@ class LMB_OT_tag_collection_add(Operator):
 
         if not selected_cols:
             self.report({'INFO'},
-                        "There are no collections selected, nothing to add.")
+                        "[ShotManager] There are no collections selected, nothing to add.")
             return {'CANCELLED'}
 
         existing = [item.collection for item in props.tag_collections]
@@ -114,7 +119,7 @@ class LMB_OT_tag_collection_add(Operator):
             for other in existing + to_add:
                 if has_hierarchy_relation(coll, other):
                     self.report({'INFO'},
-                                "Child or parent collections can not be tagged. Only the same level of collection hierarchy is allowed to TAG")
+                                "[ShotManager] Child or parent collections can not be tagged. Only the same level of collection hierarchy is allowed to TAG")
                     return {'CANCELLED'}
             to_add.append(coll)
 
@@ -129,6 +134,7 @@ class LMB_OT_tag_collection_add(Operator):
 class LMB_OT_tag_collection_remove(Operator):
     bl_idname = "lmb.tag_collection_remove"
     bl_label = "Remove Collection from TAG"
+    bl_description = "Remove the selected collection from the TAG list"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -140,11 +146,26 @@ class LMB_OT_tag_collection_remove(Operator):
         return {'FINISHED'}
 
 
+class LMB_OT_cycle_tag_collection(Operator):
+    bl_idname = "lmb.cycle_tag_collection"
+    bl_label = "Cycle Tagged Collections"
+    bl_description = "Solo each tagged collection one after another"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        coll = cycle_tag_collections(context)
+        if coll is None:
+            self.report({'INFO'}, "[ShotManager] No tagged collections found")
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
 classes = (
     TagCollectionItem,
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_remove,
+    LMB_OT_cycle_tag_collection,
 )
 
 

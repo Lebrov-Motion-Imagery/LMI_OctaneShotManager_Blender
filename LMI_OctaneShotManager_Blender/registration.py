@@ -4,11 +4,21 @@ from .icons import load_icons, unload_icons
 from .properties import OctanePointCloudProperties
 from .exporters.csv_export import LMB_OT_export_csv
 from .exporters.abc_export import LMB_OT_export_abc
-from .tags_workflow import (
+from .exporters.orbx_export import (
+    LMB_OT_export_orbx_tags,
+    LMB_OT_export_orbx_selected_tags,
+    LMB_OT_export_orbx_direct_merged,
+)
+from .exporters.orbx_merge import (
+    LMB_OT_merge_selected_tags,
+    LMB_OT_merge_all_tags,
+)
+from .Workflows.TAGs.tags_workflow import (
     TagCollectionItem,
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_remove,
+    LMB_OT_cycle_tag_collection,
 )
 from .ui import POINTCLOUD_PT_panel
 
@@ -19,11 +29,28 @@ classes = (
     OctanePointCloudProperties,
     LMB_OT_export_csv,
     LMB_OT_export_abc,
+    LMB_OT_export_orbx_tags,
+    LMB_OT_export_orbx_selected_tags,
+    LMB_OT_export_orbx_direct_merged,
+    LMB_OT_merge_selected_tags,
+    LMB_OT_merge_all_tags,
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_remove,
+    LMB_OT_cycle_tag_collection,
     POINTCLOUD_PT_panel,
 )
+
+
+def _init_scene_props():
+    """Initialize scene properties after registration."""
+    for scene in bpy.data.scenes:
+        props = scene.otpc_props
+        props.tag_frame_start = scene.frame_start
+        props.tag_frame_end = scene.frame_end
+        props.tag_use_chunks = True
+        if props.tag_chunk_size <= 0:
+            props.tag_chunk_size = 25
 
 
 def register():
@@ -44,6 +71,7 @@ def register():
         bpy.types.Scene.otpc_props = bpy.props.PointerProperty(
             type=OctanePointCloudProperties
         )
+        bpy.app.timers.register(_init_scene_props, first_interval=0.0)
 
 
 def unregister():
@@ -57,3 +85,4 @@ def unregister():
 
     if hasattr(bpy.types.Scene, "otpc_props"):
         del bpy.types.Scene.otpc_props
+    bpy.app.timers.unregister(_init_scene_props)

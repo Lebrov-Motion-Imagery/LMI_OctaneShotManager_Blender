@@ -1,4 +1,5 @@
 import bpy
+import os
 from bpy.props import (
     BoolProperty,
     EnumProperty,
@@ -8,7 +9,20 @@ from bpy.props import (
     IntProperty,
 )
 
-from .tags_workflow import TagCollectionItem
+from .Workflows.TAGs.tags_workflow import TagCollectionItem
+from .utils import resolve_octane_executable
+
+
+def _update_octane_path(self, context):
+    """Resolve and store an absolute path to the Octane executable."""
+    if not self.octane_standalone_path:
+        return
+    resolved = resolve_octane_executable(self.octane_standalone_path)
+    if resolved:
+        self["octane_standalone_path"] = resolved
+    else:
+        abs_path = os.path.abspath(bpy.path.abspath(self.octane_standalone_path))
+        self["octane_standalone_path"] = abs_path
 
 
 class OctanePointCloudProperties(bpy.types.PropertyGroup):
@@ -25,7 +39,7 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
             ('COLLECTION', "Collection", "Export all objects in a collection"),
         ],
         default='OBJECT',
-    ) # type: ignore
+    )  # type: ignore
     csv_object_source: PointerProperty(
         name="CSV Object",
         description="Instancer object for CSV export",
@@ -148,3 +162,40 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
 
     tag_collections: CollectionProperty(type=TagCollectionItem)
     tag_collections_index: IntProperty(default=-1)
+    tag_cycle_index: IntProperty(default=-1, options={'HIDDEN'})
+
+    # TAGs frame range and chunk settings
+    tag_frame_start: IntProperty(
+        name="First Frame",
+        description="First frame to export TAGs",
+        default=1,
+    )
+    tag_frame_end: IntProperty(
+        name="Last Frame",
+        description="Last frame to export TAGs",
+        default=250,
+    )
+    tag_use_chunks: BoolProperty(
+        name="Use Chunking",
+        description="Split TAG export into equal sized chunks",
+        default=True,
+    )
+    tag_chunk_size: IntProperty(
+        name="Chunk Size",
+        description="Number of frames per chunk when exporting TAGs",
+        default=25,
+        min=1,
+    )
+
+    overwrite_orbx: BoolProperty(
+        name="Overwrite ORBX",
+        description="Allow overwriting existing ORBX files",
+        default=False,
+    )
+
+    octane_standalone_path: StringProperty(
+        name="Octane Standalone",
+        description="Absolute path to the Octane executable",
+        subtype='FILE_PATH',
+        update=_update_octane_path,
+    )

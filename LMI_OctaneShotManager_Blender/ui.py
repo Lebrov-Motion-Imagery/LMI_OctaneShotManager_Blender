@@ -2,6 +2,7 @@ import bpy
 from .icons import icon_collections
 from bpy.types import Panel
 
+
 class POINTCLOUD_PT_panel(Panel):
     bl_label = "LMI Octane Shot Manager"
     bl_idname = "POINTCLOUD_PT_panel"
@@ -64,8 +65,27 @@ class POINTCLOUD_PT_panel(Panel):
             col = row.column(align=True)
             col.operator('lmb.tag_collection_add', icon='ADD', text='')
             col.operator('lmb.tag_collection_remove', icon='REMOVE', text='')
+
+            tag_box.label(text="Frame Range and Chunk:")
+            row = tag_box.row(align=True)
+            row.prop(p, 'tag_frame_start')
+            row.prop(p, 'tag_frame_end')
+
+            row = tag_box.row(align=True)
+            row.prop(p, 'tag_use_chunks')
+            if p.tag_use_chunks:
+                row.prop(p, 'tag_chunk_size', text='Chunk')
+            tag_box.operator('lmb.cycle_tag_collection', text='Cycle Collection')
+            tag_box.prop(p, 'overwrite_orbx')
+            tag_box.operator('lmb.export_orbx_tags', text="Export all Tags to a 'Per Tag' ORBX", icon='EXPORT')
+            tag_box.operator('lmb.export_orbx_selected_tags', text="Export selected Tags to an ORBX", icon='EXPORT')
+            tag_box.operator('lmb.export_orbx_direct_merged', text="Export directly to a Merged ORBX", icon='EXPORT')
+            merge_box = tag_box.box()
+            merge_box.prop(p, 'octane_standalone_path')
+            merge_box.operator('lmb.merge_selected_tags', text='Merge selected Tags', icon='EXPORT')
+            merge_box.operator('lmb.merge_all_tags', text='Merge all Tags', icon='EXPORT')
             layout.separator()
-            
+
         # PointCloud Baker dropdown
         row = layout.row()
         arrow = 'TRIA_DOWN' if p.show_pointcloud_baker else 'TRIA_RIGHT'
@@ -101,4 +121,3 @@ class POINTCLOUD_PT_panel(Panel):
                     box.prop(p, 'abc_collection_source')
                 box.prop(p, 'overwrite_abc')
                 box.operator('lmb.export_abc', text="Export Alembic", icon='EXPORT')
-

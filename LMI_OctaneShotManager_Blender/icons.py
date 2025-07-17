@@ -4,6 +4,7 @@ import bpy.utils.previews
 
 icon_collections = {}
 
+
 def load_icons():
     """
     Load custom icons and store them in icon_collections['main'].
