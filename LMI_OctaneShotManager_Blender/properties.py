@@ -1,4 +1,5 @@
 import bpy
+import os
 from bpy.props import (
     BoolProperty,
     EnumProperty,
@@ -9,6 +10,18 @@ from bpy.props import (
 )
 
 from .Workflows.TAGs.tags_workflow import TagCollectionItem
+from .utils import resolve_octane_executable
+
+
+def _update_octane_path(self, context):
+    if not self.octane_standalone_path:
+        return
+    resolved = resolve_octane_executable(self.octane_standalone_path)
+    if resolved:
+        self["octane_standalone_path"] = resolved
+    else:
+        abs_path = os.path.abspath(bpy.path.abspath(self.octane_standalone_path))
+        self["octane_standalone_path"] = abs_path
 
 
 class OctanePointCloudProperties(bpy.types.PropertyGroup):
@@ -177,4 +190,11 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         name="Overwrite ORBX",
         description="Allow overwriting existing ORBX files",
         default=False,
+    )
+
+    octane_standalone_path: StringProperty(
+        name="Octane Standalone",
+        description="Absolute path to the Octane executable",
+        subtype='FILE_PATH',
+        update=_update_octane_path,
     )

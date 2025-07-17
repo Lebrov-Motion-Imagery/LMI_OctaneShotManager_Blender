@@ -1,6 +1,7 @@
 import bpy
 import os
 import re
+import subprocess
 from ...utils import find_layer_collection
 
 
@@ -331,6 +332,61 @@ def make_direct_merged_orbx_export_manager(task_queue, export_dir, base_name, ov
                 state['waiting_for'] = None
             else:
                 print(f"…waiting for {name}")
+            return poll_interval
+
+    return manager
+
+
+def make_orbx_merge_manager(
+    task_queue,
+    octane_exec,
+    script_path,
+    poll_interval=3.0,
+):
+    """Create a timer callback to merge ORBX chunks using Octane standalone."""
+
+    state = {
+        'proc': None,
+        'waiting_for': None,
+        'cmd': None,
+    }
+
+    def manager():
+        if state['proc'] is None:
+            while task_queue:
+                task = task_queue.pop(0)
+                save_path, destination, *sources = task
+                cmd = [
+                    octane_exec,
+                    '--no-gui',
+                    '--script',
+                    script_path,
+                    '-A',
+                    save_path,
+                    destination,
+                ]
+                cmd.extend(sources)
+                state['proc'] = subprocess.Popen(cmd)
+                state['waiting_for'] = save_path
+                state['cmd'] = cmd
+                return poll_interval
+
+            print("✅ All merges done.")
+            return None
+        else:
+            if state['proc'].poll() is None:
+                name = os.path.basename(state['waiting_for'])
+                print(f"…waiting for {name}")
+                return poll_interval
+
+            name = os.path.basename(state['waiting_for'])
+            if is_file_created(state['waiting_for']):
+                print(f"✔ Done {name}")
+            else:
+                print(f"❌ Failed {name}")
+            state['proc'] = None
+            state['waiting_for'] = None
+            state['cmd'] = None
             return poll_interval
 
     return manager

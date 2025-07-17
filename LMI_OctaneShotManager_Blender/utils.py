@@ -36,6 +36,31 @@ def find_layer_collection(layer_collection, collection):
     return None
 
 # -----------------------------------------------------------------------------
+# Executable Helpers
+# -----------------------------------------------------------------------------
+def resolve_octane_executable(path):
+    """Return an absolute path to the Octane executable if valid."""
+    import bpy
+    import sys
+
+    if not path:
+        return None
+
+    abspath = os.path.abspath(bpy.path.abspath(path))
+    if os.path.isfile(abspath):
+        return abspath
+
+    if sys.platform == 'darwin' and abspath.endswith('.app') and os.path.isdir(abspath):
+        macos_dir = os.path.join(abspath, 'Contents', 'MacOS')
+        if os.path.isdir(macos_dir):
+            for name in os.listdir(macos_dir):
+                candidate = os.path.join(macos_dir, name)
+                if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+                    return candidate
+
+    return None
+
+# -----------------------------------------------------------------------------
 # Filename Generators
 # -----------------------------------------------------------------------------
 def generate_export_filename(parts, ext):
