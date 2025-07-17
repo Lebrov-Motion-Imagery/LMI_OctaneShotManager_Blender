@@ -36,6 +36,17 @@ classes = (
 )
 
 
+def _init_scene_props():
+    """Initialize scene properties after registration."""
+    for scene in bpy.data.scenes:
+        props = scene.otpc_props
+        props.tag_frame_start = scene.frame_start
+        props.tag_frame_end = scene.frame_end
+        props.tag_use_chunks = True
+        if props.tag_chunk_size <= 0:
+            props.tag_chunk_size = 25
+
+
 def register():
     """Load icons and register all classes and properties.
 
@@ -54,15 +65,7 @@ def register():
         bpy.types.Scene.otpc_props = bpy.props.PointerProperty(
             type=OctanePointCloudProperties
         )
-
-        # Initialize TAGs frame range properties from the scene
-        for scene in bpy.data.scenes:
-            props = scene.otpc_props
-            props.tag_frame_start = scene.frame_start
-            props.tag_frame_end = scene.frame_end
-            props.tag_use_chunks = True
-            if props.tag_chunk_size <= 0:
-                props.tag_chunk_size = 25
+        bpy.app.timers.register(_init_scene_props, first_interval=0.0)
 
 
 def unregister():
@@ -76,3 +79,4 @@ def unregister():
 
     if hasattr(bpy.types.Scene, "otpc_props"):
         del bpy.types.Scene.otpc_props
+    bpy.app.timers.unregister(_init_scene_props)
