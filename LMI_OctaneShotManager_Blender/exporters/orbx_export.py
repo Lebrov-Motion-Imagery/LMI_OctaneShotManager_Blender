@@ -13,7 +13,7 @@ from ..Workflows.TAGs.utils import (
     filter_missing_parts,
     make_orbx_export_manager,
     make_direct_merged_orbx_export_manager,
-    unsolo_tagged_collections,
+    solo_tagged_collections,
 )
 
 
@@ -50,7 +50,7 @@ class LMB_OT_export_orbx_tags(Operator):
             self.report({'ERROR'}, "No tagged collections defined.")
             return {'CANCELLED'}
 
-        unsolo_tagged_collections(context)
+        solo_tagged_collections(context)
 
         scene_name = _resolve_scene_name(props, scene)
         shot_name = _resolve_shot_name(props)
@@ -108,7 +108,7 @@ class LMB_OT_export_orbx_direct_merged(Operator):
             self.report({'ERROR'}, "No tagged collections defined.")
             return {'CANCELLED'}
 
-        unsolo_tagged_collections(context)
+        solo_tagged_collections(context)
 
         scene_name = _resolve_scene_name(props, scene)
         shot_name = _resolve_shot_name(props)

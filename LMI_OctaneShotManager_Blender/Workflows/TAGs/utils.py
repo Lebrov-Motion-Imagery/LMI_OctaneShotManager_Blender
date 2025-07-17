@@ -47,14 +47,20 @@ def cycle_tag_collections(context):
     return coll
 
 
-def unsolo_tagged_collections(context):
-    """Unsolo all tagged collections in the current view layer."""
+def solo_tagged_collections(context):
+    """Solo all tagged collections in the current view layer."""
     props = context.scene.otpc_props
     root_layer = context.view_layer.layer_collection
-    _set_exclude_recursive(root_layer, False)
+    _set_exclude_recursive(root_layer, True)
     for item in props.tag_collections:
-        if item.exclude:
-            item.exclude = False
+        coll = item.collection
+        if not coll:
+            continue
+        layer = find_layer_collection(root_layer, coll)
+        if layer:
+            _unexclude_recursive(layer)
+        if not item.exclude:
+            item.exclude = True
 
 
 def chunk_frame_ranges(start, end, step):
