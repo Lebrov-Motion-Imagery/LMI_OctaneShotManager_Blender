@@ -14,6 +14,7 @@ from .utils import resolve_octane_executable
 
 
 def _update_octane_path(self, context):
+    """Resolve and store an absolute path to the Octane executable."""
     if not self.octane_standalone_path:
         return
     resolved = resolve_octane_executable(self.octane_standalone_path)
@@ -38,7 +39,7 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
             ('COLLECTION', "Collection", "Export all objects in a collection"),
         ],
         default='OBJECT',
-    ) # type: ignore
+    )  # type: ignore
     csv_object_source: PointerProperty(
         name="CSV Object",
         description="Instancer object for CSV export",

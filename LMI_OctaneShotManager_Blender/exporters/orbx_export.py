@@ -2,11 +2,14 @@ import os
 import bpy
 from bpy.types import Operator
 
-from ..properties import OctanePointCloudProperties
+from typing import TYPE_CHECKING
 from ..utils import (
     ensure_directory,
     build_scene_shot_prefix,
 )
+
+if TYPE_CHECKING:  # pragma: no cover - for type hints only
+    from ..properties import OctanePointCloudProperties  # noqa: F401
 from ..Workflows.TAGs.utils import (
     get_tagged_collections,
     get_selected_tagged_collections,
@@ -40,6 +43,7 @@ class LMB_OT_export_orbx_tags(Operator):
     """Export tagged collections to individual ORBX files."""
     bl_idname = "lmb.export_orbx_tags"
     bl_label = "Export all Tags to a 'Per Tag' ORBX"
+    bl_description = "Export every tagged collection to its own ORBX"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -48,7 +52,7 @@ class LMB_OT_export_orbx_tags(Operator):
 
         collections = get_tagged_collections(scene)
         if not collections:
-            self.report({'ERROR'}, "No tagged collections defined.")
+            self.report({'ERROR'}, "[ShotManager] No tagged collections defined.")
             return {'CANCELLED'}
 
         solo_tagged_collections(context)
@@ -82,7 +86,7 @@ class LMB_OT_export_orbx_tags(Operator):
                     chunk_size if use_chunks else None,
                 )
             except ValueError as exc:
-                self.report({'ERROR'}, str(exc))
+                self.report({'ERROR'}, f"[ShotManager] {str(exc)}")
                 return {'CANCELLED'}
             for part_no, frm, to in parts:
                 task_queue.append((coll, part_no, frm, to))
@@ -90,7 +94,7 @@ class LMB_OT_export_orbx_tags(Operator):
         export_manager = make_orbx_export_manager(task_queue, export_dir, prefix, props.overwrite_orbx, poll_interval=3.0)
         bpy.app.timers.register(export_manager, first_interval=0.0)
 
-        self.report({'INFO'}, "ORBX export started.")
+        self.report({'INFO'}, "[ShotManager] ORBX export started.")
         return {'FINISHED'}
 
 
@@ -98,6 +102,7 @@ class LMB_OT_export_orbx_selected_tags(Operator):
     """Export checked tagged collections to individual ORBX files."""
     bl_idname = "lmb.export_orbx_selected_tags"
     bl_label = "Export selected Tags to an ORBX"
+    bl_description = "Export only selected tagged collections"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -106,7 +111,7 @@ class LMB_OT_export_orbx_selected_tags(Operator):
 
         collections = get_selected_tagged_collections(scene)
         if not collections:
-            self.report({'ERROR'}, "No selected tagged collections.")
+            self.report({'ERROR'}, "[ShotManager] No selected tagged collections.")
             return {'CANCELLED'}
 
         scene_name = _resolve_scene_name(props, scene)
@@ -138,7 +143,7 @@ class LMB_OT_export_orbx_selected_tags(Operator):
                     chunk_size if use_chunks else None,
                 )
             except ValueError as exc:
-                self.report({'ERROR'}, str(exc))
+                self.report({'ERROR'}, f"[ShotManager] {str(exc)}")
                 return {'CANCELLED'}
             for part_no, frm, to in parts:
                 task_queue.append((coll, part_no, frm, to))
@@ -146,7 +151,7 @@ class LMB_OT_export_orbx_selected_tags(Operator):
         export_manager = make_orbx_export_manager(task_queue, export_dir, prefix, props.overwrite_orbx, poll_interval=3.0)
         bpy.app.timers.register(export_manager, first_interval=0.0)
 
-        self.report({'INFO'}, "ORBX export started.")
+        self.report({'INFO'}, "[ShotManager] ORBX export started.")
         return {'FINISHED'}
 
 
@@ -154,6 +159,7 @@ class LMB_OT_export_orbx_direct_merged(Operator):
     """Export all tagged collections directly into a merged ORBX sequence."""
     bl_idname = "lmb.export_orbx_direct_merged"
     bl_label = "Export directly to a Merged ORBX"
+    bl_description = "Export a merged ORBX without per-tag files"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -162,7 +168,7 @@ class LMB_OT_export_orbx_direct_merged(Operator):
 
         collections = get_tagged_collections(scene)
         if not collections:
-            self.report({'ERROR'}, "No tagged collections defined.")
+            self.report({'ERROR'}, "[ShotManager] No tagged collections defined.")
             return {'CANCELLED'}
 
         solo_tagged_collections(context)
@@ -194,7 +200,7 @@ class LMB_OT_export_orbx_direct_merged(Operator):
                 chunk_size if use_chunks else None,
             )
         except ValueError as exc:
-            self.report({'ERROR'}, str(exc))
+            self.report({'ERROR'}, f"[ShotManager] {str(exc)}")
             return {'CANCELLED'}
 
         task_queue = [(part_no, frm, to) for part_no, frm, to in parts]
@@ -202,5 +208,5 @@ class LMB_OT_export_orbx_direct_merged(Operator):
         export_manager = make_direct_merged_orbx_export_manager(task_queue, export_dir, base_name, props.overwrite_orbx, poll_interval=3.0)
         bpy.app.timers.register(export_manager, first_interval=0.0)
 
-        self.report({'INFO'}, "ORBX export started.")
+        self.report({'INFO'}, "[ShotManager] ORBX export started.")
         return {'FINISHED'}

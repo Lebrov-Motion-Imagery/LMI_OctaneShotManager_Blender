@@ -19,11 +19,11 @@
 -- @return boolean Returns true if both arguments are provided, false otherwise
 local function checkRequiredArguments(saveAsScene, destinationScene)
   if not saveAsScene then
-    print("saveAsScene required as an -A script argument.")
+    print("[ShotManager] saveAsScene required as an -A script argument.")
     return false
   end
   if not destinationScene then
-    print("Destination scene required as an -A script argument.")
+    print("[ShotManager] Destination scene required as an -A script argument.")
     return false
   end
   return true
@@ -47,7 +47,7 @@ end
 -- @param geoGroupNode The geometry group node to connect the source geometries to
 local function processSourceScenes(sourceScenes, geoGroupNode)
   for i, sourceScene in ipairs(sourceScenes) do
-    print(string.format("Opening source scene: %s", sourceScene))
+    print(string.format("[ShotManager] Opening source scene: %s", sourceScene))
     octane.project.load(sourceScene)
     local sourceGraph = octane.project.getSceneGraph()
     local sourceRenderTarget = sourceGraph:findFirstNode(octane.NT_RENDERTARGET)
@@ -63,7 +63,7 @@ end
 -- @param destinationScene The path to the destination scene file
 -- @param geoGroupNode The geometry group node containing the combined source geometries
 local function combineScenes(destinationScene, geoGroupNode)
-  print(string.format("Opening destination scene: %s", destinationScene))
+  print(string.format("[ShotManager] Opening destination scene: %s", destinationScene))
   octane.project.load(destinationScene)
   local destinationGraph = octane.project.getSceneGraph()
   local destinationRenderTarget = destinationGraph:findFirstNode(octane.NT_RENDERTARGET)
@@ -79,7 +79,7 @@ end
 local function cleanUpAndSave(saveAsScene)
   octane.project.getSceneGraph():findFirstNode(octane.NT_RENDERTARGET):deleteUnconnectedItems()
   octane.project.getSceneGraph():unfold()
-  print(string.format("Saving combined scene as %s", saveAsScene))
+  print(string.format("[ShotManager] Saving combined scene as %s", saveAsScene))
   octane.project.saveAs(saveAsScene)
 end
 
@@ -97,7 +97,7 @@ local function main()
 
   -- Check if at least one source scene is provided
   if #sourceScenes == 0 then
-    print("At least one source scene required as an -A script argument.")
+    print("[ShotManager] At least one source scene required as an -A script argument.")
     return
   end
 

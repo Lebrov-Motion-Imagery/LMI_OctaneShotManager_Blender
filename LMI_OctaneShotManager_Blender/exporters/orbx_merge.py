@@ -24,6 +24,7 @@ from ..Workflows.TAGs.utils import (
 def _resolve_scene_name(
     props: OctanePointCloudProperties, scene: bpy.types.Scene
 ) -> str:
+    """Return the scene name token based on user settings."""
     if props.scene_name_source == 'FILE':
         filepath = bpy.data.filepath
         return (
@@ -37,6 +38,7 @@ def _resolve_scene_name(
 
 
 def _resolve_shot_name(props: OctanePointCloudProperties) -> str:
+    """Return the shot name token based on user settings."""
     if props.shot_name_source == 'OBJECT':
         obj = props.shot_object_source
         return obj.name if obj else ''
@@ -44,6 +46,7 @@ def _resolve_shot_name(props: OctanePointCloudProperties) -> str:
 
 
 def _collect_parts(directory: str, prefix: str, collections, expected):
+    """Verify that all collections have the expected ORBX chunks."""
     parts_map = {}
     for coll in collections:
         base = f"{prefix}_{coll.name}"
@@ -59,6 +62,7 @@ def _collect_parts(directory: str, prefix: str, collections, expected):
 
 
 def _build_tasks(parts_map, collections, out_dir, base_name, ranges):
+    """Return merge tasks for ``make_orbx_merge_manager``."""
     tasks = []
     coll_names = [c.name for c in collections]
     for part_no, frm, to in ranges:
@@ -73,6 +77,7 @@ def _build_tasks(parts_map, collections, out_dir, base_name, ranges):
 class LMB_OT_merge_selected_tags(Operator):
     bl_idname = "lmb.merge_selected_tags"
     bl_label = "Merge selected Tags"
+    bl_description = "Merge ORBX parts from checked collections"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -81,12 +86,12 @@ class LMB_OT_merge_selected_tags(Operator):
 
         octane_exec = resolve_octane_executable(props.octane_standalone_path)
         if not octane_exec:
-            self.report({'ERROR'}, 'Invalid Octane Standalone path')
+            self.report({'ERROR'}, '[ShotManager] Invalid Octane Standalone path')
             return {'CANCELLED'}
 
         collections = get_selected_tagged_collections(scene)
         if not collections:
-            self.report({'ERROR'}, 'No selected tagged collections.')
+            self.report({'ERROR'}, '[ShotManager] No selected tagged collections.')
             return {'CANCELLED'}
 
         scene_name = _resolve_scene_name(props, scene)
@@ -117,7 +122,7 @@ class LMB_OT_merge_selected_tags(Operator):
             expected,
         )
         if err:
-            self.report({'ERROR'}, err)
+            self.report({'ERROR'}, f"[ShotManager] {err}")
             return {'CANCELLED'}
 
         base_name = f"{prefix}_Merged_{'_'.join(c.name for c in collections)}"
@@ -142,13 +147,14 @@ class LMB_OT_merge_selected_tags(Operator):
         )
         bpy.app.timers.register(manager, first_interval=0.0)
 
-        self.report({'INFO'}, 'ORBX merging started.')
+        self.report({'INFO'}, '[ShotManager] ORBX merging started.')
         return {'FINISHED'}
 
 
 class LMB_OT_merge_all_tags(Operator):
     bl_idname = "lmb.merge_all_tags"
     bl_label = "Merge all Tags"
+    bl_description = "Merge ORBX parts from all tagged collections"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -157,12 +163,12 @@ class LMB_OT_merge_all_tags(Operator):
 
         octane_exec = resolve_octane_executable(props.octane_standalone_path)
         if not octane_exec:
-            self.report({'ERROR'}, 'Invalid Octane Standalone path')
+            self.report({'ERROR'}, '[ShotManager] Invalid Octane Standalone path')
             return {'CANCELLED'}
 
         collections = get_tagged_collections(scene)
         if not collections:
-            self.report({'ERROR'}, 'No tagged collections defined.')
+            self.report({'ERROR'}, '[ShotManager] No tagged collections defined.')
             return {'CANCELLED'}
 
         scene_name = _resolve_scene_name(props, scene)
@@ -193,7 +199,7 @@ class LMB_OT_merge_all_tags(Operator):
             expected,
         )
         if err:
-            self.report({'ERROR'}, err)
+            self.report({'ERROR'}, f"[ShotManager] {err}")
             return {'CANCELLED'}
 
         base_name = f"{prefix}_Merged"
@@ -220,7 +226,7 @@ class LMB_OT_merge_all_tags(Operator):
         )
         bpy.app.timers.register(manager, first_interval=0.0)
 
-        self.report({'INFO'}, 'ORBX merging started.')
+        self.report({'INFO'}, '[ShotManager] ORBX merging started.')
         return {'FINISHED'}
 
 

@@ -1,24 +1,24 @@
 import os
-import csv
 import bpy
 from bpy.types import Operator
-
-from ..properties import OctanePointCloudProperties
+from typing import TYPE_CHECKING
 from ..utils import (
     ensure_directory,
     build_asset_world_matrices,
     write_csv_groups,
-    generate_export_filename,
     build_scene_shot_prefix,
-    CSV_EXTENSION,
     parse_frame_range,
 )
+
+if TYPE_CHECKING:  # pragma: no cover - for type hints only
+    from ..properties import OctanePointCloudProperties  # noqa: F401
 
 
 class LMB_OT_export_csv(Operator):
     """Export scattered instances to per-object CSV files, optionally over a frame sequence."""
     bl_idname = "lmb.export_csv"
     bl_label = "Export Pointcloud CSV"
+    bl_description = "Export selected instancers to CSV files"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -55,7 +55,7 @@ class LMB_OT_export_csv(Operator):
             root_folder = f"{props.csv_collection_source.name}_CSVs"
 
         if not instancers:
-            self.report({'ERROR'}, "No CSV instancer sources defined.")
+            self.report({'ERROR'}, "[ShotManager] No CSV instancer sources defined.")
             return {'CANCELLED'}
 
         scene_name = resolve_scene_name()
@@ -99,7 +99,7 @@ class LMB_OT_export_csv(Operator):
                     prefix_parts=[prefix]
                 )
 
-        self.report({'INFO'}, "CSV export completed.")
+        self.report({'INFO'}, "[ShotManager] CSV export completed.")
         return {'FINISHED'}
 
 
