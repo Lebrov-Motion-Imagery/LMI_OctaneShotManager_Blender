@@ -9,6 +9,15 @@ def get_tagged_collections(scene):
     return [item.collection for item in scene.otpc_props.tag_collections if item.collection]
 
 
+def get_selected_tagged_collections(scene):
+    """Return only the tagged collections whose solo toggle is enabled."""
+    return [
+        item.collection
+        for item in scene.otpc_props.tag_collections
+        if item.collection and item.exclude
+    ]
+
+
 def _set_exclude_recursive(layer_coll, state):
     for child in layer_coll.children:
         _set_exclude_recursive(child, state)
