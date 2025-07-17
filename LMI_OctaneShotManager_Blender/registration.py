@@ -4,7 +4,7 @@ from .icons import load_icons, unload_icons
 from .properties import OctanePointCloudProperties
 from .exporters.csv_export import LMB_OT_export_csv
 from .exporters.abc_export import LMB_OT_export_abc
-from .exporters.orbx_export import LMB_OT_export_orbx_tags
+from .exporters.orbx_export import LMB_OT_export_orbx_tags, LMB_OT_export_orbx_all_in_one
 from .Workflows.TAGs.tags_workflow import (
     TagCollectionItem,
     LMB_UL_tag_collections,
@@ -22,6 +22,7 @@ classes = (
     LMB_OT_export_csv,
     LMB_OT_export_abc,
     LMB_OT_export_orbx_tags,
+    LMB_OT_export_orbx_all_in_one,
     LMB_UL_tag_collections,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_remove,
