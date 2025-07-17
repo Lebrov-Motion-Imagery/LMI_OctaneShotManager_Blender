@@ -7,7 +7,11 @@ import bpy
 from bpy.types import Operator
 
 from ..properties import OctanePointCloudProperties
-from ..utils import ensure_directory, build_scene_shot_prefix
+from ..utils import (
+    ensure_directory,
+    build_scene_shot_prefix,
+    resolve_octane_executable,
+)
 from ..Workflows.TAGs.utils import (
     get_tagged_collections,
     get_selected_tagged_collections,
@@ -75,8 +79,8 @@ class LMB_OT_merge_selected_tags(Operator):
         props = context.scene.otpc_props  # type: OctanePointCloudProperties
         scene = context.scene
 
-        octane_exec = bpy.path.abspath(props.octane_standalone_path)
-        if not os.path.isfile(octane_exec):
+        octane_exec = resolve_octane_executable(props.octane_standalone_path)
+        if not octane_exec:
             self.report({'ERROR'}, 'Invalid Octane Standalone path')
             return {'CANCELLED'}
 
@@ -151,8 +155,8 @@ class LMB_OT_merge_all_tags(Operator):
         props = context.scene.otpc_props  # type: OctanePointCloudProperties
         scene = context.scene
 
-        octane_exec = bpy.path.abspath(props.octane_standalone_path)
-        if not os.path.isfile(octane_exec):
+        octane_exec = resolve_octane_executable(props.octane_standalone_path)
+        if not octane_exec:
             self.report({'ERROR'}, 'Invalid Octane Standalone path')
             return {'CANCELLED'}
 
