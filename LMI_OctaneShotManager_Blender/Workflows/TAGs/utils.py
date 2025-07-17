@@ -180,7 +180,7 @@ def filter_missing_parts(parts, export_dir, base_name, overwrite, chunk_size=Non
     if overwrite and existing_parts:
         req_start = parts[0][1] if parts else None
         req_end = parts[-1][2] if parts else None
-        if req_start is not None and req_start != first_frame:
+        if req_start is not None and req_start > first_frame:
             raise ValueError(
                 "Requested start frame does not match existing sequence. "
                 f"Use {first_frame} as start frame."
@@ -192,11 +192,13 @@ def filter_missing_parts(parts, export_dir, base_name, overwrite, chunk_size=Non
             )
 
     chunk = exist_chunk or req_chunk
-    base_start = (
-        min((s for _, s, _ in existing_parts), default=parts[0][1] if parts else 1)
-        if chunk
-        else (parts[0][1] if parts else 1)
-    )
+    if chunk:
+        existing_start = min((s for _, s, _ in existing_parts), default=None)
+        requested_start = parts[0][1] if parts else None
+        starts = [s for s in (existing_start, requested_start) if s is not None]
+        base_start = min(starts) if starts else 1
+    else:
+        base_start = parts[0][1] if parts else 1
 
     existing_map = {pn: (s, e) for pn, s, e in existing_parts}
 
