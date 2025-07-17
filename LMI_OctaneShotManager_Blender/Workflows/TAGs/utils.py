@@ -20,12 +20,14 @@ def get_selected_tagged_collections(scene):
 
 
 def _set_exclude_recursive(layer_coll, state):
+    """Recursively set ``exclude`` on a LayerCollection tree."""
     for child in layer_coll.children:
         _set_exclude_recursive(child, state)
         child.exclude = state
 
 
 def _unexclude_recursive(layer_coll):
+    """Recursively clear ``exclude`` on a LayerCollection tree."""
     layer_coll.exclude = False
     for child in layer_coll.children:
         _unexclude_recursive(child)

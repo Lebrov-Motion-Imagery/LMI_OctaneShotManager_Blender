@@ -40,6 +40,7 @@ class LMB_OT_export_orbx_tags(Operator):
     """Export tagged collections to individual ORBX files."""
     bl_idname = "lmb.export_orbx_tags"
     bl_label = "Export all Tags to a 'Per Tag' ORBX"
+    bl_description = "Export every tagged collection to its own ORBX"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -98,6 +99,7 @@ class LMB_OT_export_orbx_selected_tags(Operator):
     """Export checked tagged collections to individual ORBX files."""
     bl_idname = "lmb.export_orbx_selected_tags"
     bl_label = "Export selected Tags to an ORBX"
+    bl_description = "Export only selected tagged collections"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -154,6 +156,7 @@ class LMB_OT_export_orbx_direct_merged(Operator):
     """Export all tagged collections directly into a merged ORBX sequence."""
     bl_idname = "lmb.export_orbx_direct_merged"
     bl_label = "Export directly to a Merged ORBX"
+    bl_description = "Export a merged ORBX without per-tag files"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):

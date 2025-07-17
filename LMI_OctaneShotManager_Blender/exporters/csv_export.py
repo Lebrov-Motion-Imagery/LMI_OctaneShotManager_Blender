@@ -19,6 +19,7 @@ class LMB_OT_export_csv(Operator):
     """Export scattered instances to per-object CSV files, optionally over a frame sequence."""
     bl_idname = "lmb.export_csv"
     bl_label = "Export Pointcloud CSV"
+    bl_description = "Export selected instancers to CSV files"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):

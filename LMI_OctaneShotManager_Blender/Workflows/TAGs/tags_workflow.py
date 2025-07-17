@@ -7,6 +7,7 @@ from .utils import cycle_tag_collections
 
 
 def _is_parent_of(parent, child):
+    """Return True if ``parent`` collection contains ``child`` in its hierarchy."""
     for sub in parent.children:
         if sub == child or _is_parent_of(sub, child):
             return True
@@ -24,6 +25,7 @@ class TagCollectionItem(PropertyGroup):
     )
 
     def update_exclude(self, context):
+        """Update view layer exclusion state when the Solo toggle changes."""
         props = context.scene.otpc_props
 
         def toggle_layer(layer_coll, state):
@@ -75,6 +77,7 @@ class LMB_UL_tag_collections(UIList):
 class LMB_OT_tag_collection_add(Operator):
     bl_idname = "lmb.tag_collection_add"
     bl_label = "Add Collection to TAG"
+    bl_description = "Add selected collections to the TAG list"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -130,6 +133,7 @@ class LMB_OT_tag_collection_add(Operator):
 class LMB_OT_tag_collection_remove(Operator):
     bl_idname = "lmb.tag_collection_remove"
     bl_label = "Remove Collection from TAG"
+    bl_description = "Remove the selected collection from the TAG list"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -144,6 +148,7 @@ class LMB_OT_tag_collection_remove(Operator):
 class LMB_OT_cycle_tag_collection(Operator):
     bl_idname = "lmb.cycle_tag_collection"
     bl_label = "Cycle Tagged Collections"
+    bl_description = "Solo each tagged collection one after another"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):

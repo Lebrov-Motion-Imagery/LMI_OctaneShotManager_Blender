@@ -16,6 +16,7 @@ class LMB_OT_export_abc(Operator):
     """Export selected objects or collections as Alembic files with face sets."""
     bl_idname = "lmb.export_abc"
     bl_label = "Export Alembic Instances"
+    bl_description = "Export instancer sources to Alembic"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
