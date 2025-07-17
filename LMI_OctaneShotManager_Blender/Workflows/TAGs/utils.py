@@ -166,7 +166,7 @@ def filter_missing_parts(parts, export_dir, base_name, overwrite, chunk_size=Non
         for _, start_f, end_f in existing_parts:
             c = end_f - start_f + 1
             counts[c] = counts.get(c, 0) + 1
-        exist_chunk = max(sorted(counts.items()), key=lambda kv: kv[1])[0]
+        exist_chunk = max(counts.items(), key=lambda kv: (kv[1], kv[0]))[0]
         first_frame = min(s for _, s, _ in existing_parts)
         last_frame = max(e for _, _, e in existing_parts)
 
