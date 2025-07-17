@@ -178,3 +178,9 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         description="Allow overwriting existing ORBX files",
         default=False,
     )
+
+    octane_standalone_path: StringProperty(
+        name="Octane Standalone",
+        description="Path to the Octane executable",
+        subtype='FILE_PATH',
+    )
