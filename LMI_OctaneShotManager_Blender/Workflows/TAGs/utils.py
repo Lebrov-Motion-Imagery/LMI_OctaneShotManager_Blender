@@ -277,3 +277,35 @@ def make_orbx_export_manager(task_queue, export_dir, prefix, overwrite, poll_int
             return poll_interval
 
     return manager
+
+
+def make_compound_orbx_export_manager(task_queue, export_dir, base_name, overwrite, poll_interval=3.0):
+    """Create a timer callback to export ORBX chunks without soloing."""
+    state = {'waiting_for': None}
+
+    def manager():
+        if state['waiting_for'] is None:
+            while task_queue:
+                part_no, frm, to = task_queue.pop(0)
+                filename = f"{base_name}_pt{part_no}_{frm:03d}-{to:03d}.orbx"
+                filepath = os.path.join(export_dir, filename)
+                if os.path.exists(filepath) and not overwrite:
+                    print(f"Skipping existing {filename}")
+                    continue
+                fp = export_orbx_chunk(part_no, frm, to, export_dir, base_name)
+                state['waiting_for'] = fp
+                return poll_interval
+
+            print("✅ All exports done.")
+            return None
+        else:
+            fp = state['waiting_for']
+            name = os.path.basename(fp)
+            if is_file_created(fp):
+                print(f"✔ Done {name}")
+                state['waiting_for'] = None
+            else:
+                print(f"…waiting for {name}")
+            return poll_interval
+
+    return manager
