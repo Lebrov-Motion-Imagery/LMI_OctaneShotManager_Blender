@@ -9,6 +9,15 @@ def get_tagged_collections(scene):
     return [item.collection for item in scene.otpc_props.tag_collections if item.collection]
 
 
+def get_selected_tagged_collections(scene):
+    """Return only the tagged collections whose solo toggle is enabled."""
+    return [
+        item.collection
+        for item in scene.otpc_props.tag_collections
+        if item.collection and item.exclude
+    ]
+
+
 def _set_exclude_recursive(layer_coll, state):
     for child in layer_coll.children:
         _set_exclude_recursive(child, state)
@@ -45,6 +54,22 @@ def cycle_tag_collections(context):
 
     solo_collection(context, coll)
     return coll
+
+
+def solo_tagged_collections(context):
+    """Solo all tagged collections in the current view layer."""
+    props = context.scene.otpc_props
+    root_layer = context.view_layer.layer_collection
+    _set_exclude_recursive(root_layer, True)
+    for item in props.tag_collections:
+        coll = item.collection
+        if not coll:
+            continue
+        layer = find_layer_collection(root_layer, coll)
+        if layer:
+            _unexclude_recursive(layer)
+        if not item.exclude:
+            item.exclude = True
 
 
 def chunk_frame_ranges(start, end, step):
@@ -279,7 +304,7 @@ def make_orbx_export_manager(task_queue, export_dir, prefix, overwrite, poll_int
     return manager
 
 
-def make_all_in_one_orbx_export_manager(task_queue, export_dir, base_name, overwrite, poll_interval=3.0):
+def make_direct_merged_orbx_export_manager(task_queue, export_dir, base_name, overwrite, poll_interval=3.0):
     """Create a timer callback to export ORBX chunks without soloing."""
     state = {'waiting_for': None}
 

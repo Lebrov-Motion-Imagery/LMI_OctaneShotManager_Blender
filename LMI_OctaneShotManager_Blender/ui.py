@@ -77,7 +77,8 @@ class POINTCLOUD_PT_panel(Panel):
             tag_box.operator('lmb.cycle_tag_collection', text='Cycle Collection')
             tag_box.prop(p, 'overwrite_orbx')
             tag_box.operator('lmb.export_orbx_tags', text="Export all Tags to a 'Per Tag' ORBX", icon='EXPORT')
-            tag_box.operator('lmb.export_orbx_all_in_one', text="Export all Tags to an 'All-in-one' ORBX", icon='EXPORT')
+            tag_box.operator('lmb.export_orbx_selected_tags', text="Export selected Tags to an ORBX", icon='EXPORT')
+            tag_box.operator('lmb.export_orbx_direct_merged', text="Export directly to a Merged ORBX", icon='EXPORT')
             layout.separator()
             
         # PointCloud Baker dropdown
