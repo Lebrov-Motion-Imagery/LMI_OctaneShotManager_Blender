@@ -86,6 +86,24 @@ class POINTCLOUD_PT_panel(Panel):
             merge_box.operator('lmb.merge_all_tags', text='Merge all Tags', icon='EXPORT')
             layout.separator()
 
+        # Manual ORBX Merge
+        row = layout.row()
+        arrow = 'TRIA_DOWN' if p.show_manual_orbx_merge else 'TRIA_RIGHT'
+        row.prop(p, 'show_manual_orbx_merge', text="", icon=arrow, emboss=False)
+        row.label(text="Manual ORBX Merge", icon='SEQ_STRIP_META')
+        if p.show_manual_orbx_merge:
+            box = layout.box()
+            box.prop(p, 'manual_merge_save_dir')
+            box.prop(p, 'manual_merge_scene_name')
+            box.prop(p, 'manual_merge_overwrite')
+            box.prop(p, 'manual_merge_destination')
+            row2 = box.row()
+            row2.template_list('LMB_UL_manual_merge_sources', '', p, 'manual_merge_sources', p, 'manual_merge_sources_index')
+            col = row2.column(align=True)
+            col.operator('lmb.manual_merge_source_add', icon='ADD', text='')
+            col.operator('lmb.manual_merge_source_remove', icon='REMOVE', text='')
+            box.operator('lmb.manual_orbx_merge', text='Merge ORBX', icon='EXPORT')
+            layout.separator()
         # PointCloud Baker dropdown
         row = layout.row()
         arrow = 'TRIA_DOWN' if p.show_pointcloud_baker else 'TRIA_RIGHT'

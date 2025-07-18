@@ -12,6 +12,8 @@ from bpy.props import (
 from .Workflows.TAGs.tags_workflow import TagCollectionItem
 from .utils import resolve_octane_executable
 
+from .Workflows.manual_merge.manual_merge_workflow import ManualMergeSourceItem
+
 
 def _update_octane_path(self, context):
     """Resolve and store an absolute path to the Octane executable."""
@@ -199,3 +201,32 @@ class OctanePointCloudProperties(bpy.types.PropertyGroup):
         subtype='FILE_PATH',
         update=_update_octane_path,
     )
+
+    # Manual ORBX merge settings
+    show_manual_orbx_merge: BoolProperty(
+        name="Show Manual ORBX Merge",
+        description="Display manual ORBX merge settings",
+        default=False,
+    )
+    manual_merge_save_dir: StringProperty(
+        name="Save Directory",
+        description="Directory to store merged ORBX files",
+        subtype='DIR_PATH',
+    )
+    manual_merge_scene_name: StringProperty(
+        name="Scene Name",
+        description="Base name for merged ORBX files",
+        default="",
+    )
+    manual_merge_overwrite: BoolProperty(
+        name="Overwrite ORBX",
+        description="Allow overwriting merged ORBX files",
+        default=False,
+    )
+    manual_merge_destination: StringProperty(
+        name="Destination ORBX",
+        description="ORBX file used as destination for merging",
+        subtype='FILE_PATH',
+    )
+    manual_merge_sources: CollectionProperty(type=ManualMergeSourceItem)
+    manual_merge_sources_index: IntProperty(default=-1)
