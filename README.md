@@ -1,0 +1,113 @@
+# LMI Octane Shot Manager for Blender
+
+LMI Octane Shot Manager is a Blender add-on aimed at artists working with Octane Render. It simplifies exporting collections as ORBX files, merging them back together and preparing large scenes for rendering.
+
+This document gives an overview of how to install the add-on and how each workflow functions. No scripting knowledge is required.
+
+## Installation
+
+1. Download or clone this repository.
+2. In Blender open **Edit → Preferences → Add-ons** and click **Install…**.
+3. Choose the `LMI_OctaneShotManager_Blender` folder or zip archive.
+4. Enable **LMI Octane Shot Manager** in the add-on list.
+
+After installation a new panel named **LMI Octane Shot Manager** appears in the Sidebar of the 3D View.
+
+## Naming and Output Paths
+
+All exports are saved inside the directory you set in **Output Root Directory**. The add-on builds a prefix combining your scene and shot names:
+
+```
+Scene-{scene_name}_Shot-{shot_name}
+```
+
+Spaces are replaced with underscores. Files and folders are created inside `Shot_Manager/` under the root directory.
+
+Example hierarchy:
+
+```
+<root>/Shot_Manager/
+└─ TAGs/
+   └─ Scene-MyScene_Shot-MyShot/
+      ├─ Per_Tag_ORBX/
+      └─ Merged_ORBX/
+```
+
+## TAGs Workflow
+
+The TAGs workflow allows tagging collections and exporting each as an ORBX sequence.
+
+### Tagging collections
+
+1. In the **TAGs Workflow** section press **+** to add selected collections.
+2. Use the **Solo** toggle to display only the chosen collection in the viewport.
+3. Set the **frame range** and optionally enable **chunking** to split the export into smaller parts.
+
+### Export per tag
+
+Press **Export all Tags to a ‘Per Tag’ ORBX** to create one ORBX sequence per tagged collection. Each file is named as:
+
+```
+<prefix>_{tag_name}_pt<part>_<start>-<end>.orbx
+```
+
+Example: `Scene-MyScene_Shot-MyShot_Buildings_pt1_001-025.orbx`.
+
+Exporting tags separately takes longer but keeps RAM/VRAM usage low. It is the recommended approach for complex scenes.
+
+### Merging tags automatically
+
+After exporting all tags you can merge them back into combined ORBX files:
+
+1. Set the path to **Octane Standalone**.
+2. Use **Merge selected Tags** to merge only checked collections or **Merge all Tags** to merge everything.
+
+Merged files are stored in `Merged_ORBX/`:
+
+```
+<prefix>_Merged_<tags>_pt<part>_<start>-<end>.orbx
+```
+
+### Export directly to a merged file
+
+If memory usage is not an issue you may export everything straight into a merged sequence using **Export directly to a Merged ORBX**. Files are placed in the `Merged_ORBX/` folder with names like `Scene-MyScene_Shot-MyShot_Merged_pt1_001-025.orbx`.
+
+## Chunking
+
+Chunking breaks long frame ranges into smaller parts. For example a range of `1–250` with a chunk size of `25` produces parts:
+
+```
+pt1 001-025
+pt2 026-050
+...
+pt10 226-250
+```
+
+Chunking reduces the size of individual ORBX files, making them easier to handle on the OTOY Render Network or on machines with limited memory.
+
+**Best practice:** keep chunk sizes consistent across exports and avoid changing the frame range mid-way. When re‑exporting enable **Overwrite ORBX** to replace mismatched chunks.
+
+## Manual ORBX Merge
+
+For special cases you can merge ORBX files manually:
+
+1. Expand **Manual ORBX Merge** and choose a **Save Directory** and **Scene Name**.
+2. Set the destination ORBX and add any number of source ORBX files.
+3. Press **Merge ORBX** to produce merged files named either:
+   - `<scene_name>.orbx` if no chunks are detected, or
+   - `<scene_name>_pt<part>_<start>-<end>.orbx` when merging chunked files.
+
+## Example Names
+
+- **Per tag export:** `Scene-MyScene_Shot-MyShot_Buildings_pt1_001-025.orbx`
+- **Merged sequence:** `Scene-MyScene_Shot-MyShot_Merged_Buildings_Trees_pt1_001-025.orbx`
+- **Manual merge:** `MyMergedScene_pt1_001-025.orbx`
+
+## Notes on Large Scenes
+
+- Exporting each tag separately keeps memory usage low and is strongly recommended for heavy scenes.
+- Use chunking to avoid huge ORBX files when rendering on the OTOY Render Network.
+- Consistent scene and shot naming helps keep directories organized and prevents accidental overwriting.
+
+For more detailed information on each operator see the tooltips inside Blender.
+
