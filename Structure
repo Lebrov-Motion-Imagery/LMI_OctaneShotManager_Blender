@@ -1,3 +1,5 @@
+README.md                                  # Add-on guide and installation
+LICENSE                                    # License information
 LMI_OctaneShotManager_Blender/
 ├── __init__.py                             # bl_info + top-level register/unregister
 ├── properties.py                           # All bpy.props and PropertyGroup definitions
