@@ -13,6 +13,7 @@ from .exporters.orbx_merge import (
     LMB_OT_merge_selected_tags,
     LMB_OT_merge_all_tags,
 )
+from .exporters.orbx_manual_merge import LMB_OT_manual_orbx_merge
 from .Workflows.TAGs.tags_workflow import (
     TagCollectionItem,
     LMB_UL_tag_collections,
@@ -20,12 +21,19 @@ from .Workflows.TAGs.tags_workflow import (
     LMB_OT_tag_collection_remove,
     LMB_OT_cycle_tag_collection,
 )
+from .Workflows.manual_merge.manual_merge_workflow import (
+    ManualMergeSourceItem,
+    LMB_UL_manual_merge_sources,
+    LMB_OT_manual_merge_source_add,
+    LMB_OT_manual_merge_source_remove,
+)
 from .ui import POINTCLOUD_PT_panel
 
 classes = (
     # Register the PropertyGroup used by OctanePointCloudProperties first so
     # Blender can resolve the CollectionProperty reference on registration.
     TagCollectionItem,
+    ManualMergeSourceItem,
     OctanePointCloudProperties,
     LMB_OT_export_csv,
     LMB_OT_export_abc,
@@ -35,6 +43,10 @@ classes = (
     LMB_OT_merge_selected_tags,
     LMB_OT_merge_all_tags,
     LMB_UL_tag_collections,
+    LMB_UL_manual_merge_sources,
+    LMB_OT_manual_merge_source_add,
+    LMB_OT_manual_merge_source_remove,
+    LMB_OT_manual_orbx_merge,
     LMB_OT_tag_collection_add,
     LMB_OT_tag_collection_remove,
     LMB_OT_cycle_tag_collection,

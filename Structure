@@ -5,15 +5,19 @@ LMI_OctaneShotManager_Blender/
 ├── ui.py                                   # Panel layout and shared UI helpers
 ├── registration.py                         # Central register() / unregister()
 ├── Workflows/                              # Contains different workflows logic
-│   └── TAGs/                               # Contains logic and helpers related to tagging workflows
-        ├── utils.py                        # Helper functions for TAG workflow
-│       └── tags_workflow.py                # Logic for tagging workflow and related helpers
+│   ├── TAGs/                               # Contains logic and helpers related to tagging workflows
+│   │   ├── utils.py                        # Helper functions for TAG workflow
+│   │   └── tags_workflow.py                # Logic for tagging workflow and related helpers
+│   └── manual_merge/                       # Manual ORBX merge helpers and UI
+│       ├── utils.py                        # Build tasks for manual merging
+│       └── manual_merge_workflow.py        # PropertyGroup and UIList for manual merge
 ├── icons.py                                # Icon loading helpers
 ├── exporters/                              # Contains exporters logic
 │   ├── csv_export.py                       # CSV export operator & related helpers
 │   ├── abc_export.py                       # Alembic export operator & face_sets logic
 │   ├── orbx_export.py                      # Export ORBX files for tagged collections
-│   └── orbx_merge.py                      # Merge ORBX chunks using Octane
+│   ├── orbx_merge.py                       # Merge ORBX chunks using Octane
+│   └── orbx_manual_merge.py                # Operator for manual ORBX merging
 ├── standalone_scripts/                     # Contains standalone scripts for specific tasks
 │   └── ORBXmerger.lua                      # Tool for merging ORBX files
 ├── Icons/                                  # Contains icons used in the addon
