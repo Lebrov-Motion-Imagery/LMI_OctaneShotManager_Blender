@@ -11,3 +11,6 @@ __pycache__/
 *.rslsc
 *.rslsz
 *.rslsi
+
+# Release artifacts
+dist/

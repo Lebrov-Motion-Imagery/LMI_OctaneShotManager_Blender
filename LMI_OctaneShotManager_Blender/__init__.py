@@ -3,7 +3,7 @@ from . import registration
 bl_info = {
     "name": "LMI_OctaneShotManager_Blender",
     "author": "Arseniy Kolenchenko (Lebrov Motion Imagery) & Render Foundation.",
-    "version": (1, 1, 0),
+    "version": (1, 1, 1),
     "blender": (4, 4, 3),
     "location": "View3D > Sidebar > LMI Octane ShotManager",
     "description": (

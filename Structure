@@ -23,3 +23,5 @@ LMI_OctaneShotManager_Blender/
 ├── Icons/                                  # Contains icons used in the addon
 │   ├── LMI_Octane_Pointcloud_Bake.svg      # Icon for point cloud baking
 │   └── LMI_Octane_Shot_Manager.svg         # Main icon for the addon
+scripts/
+└── build_release_zip.py                    # Builds a direct-install Blender addon zip for GitHub releases
